@@ -7,7 +7,7 @@ RUN npm ci
 
 COPY resources resources
 COPY public public
-COPY vite.config.ts tsconfig.json components.d.ts eslint.config.ts ./
+COPY vite.config.ts tsconfig.json eslint.config.ts ./
 RUN npm run build
 
 FROM composer:2 AS dependencies
