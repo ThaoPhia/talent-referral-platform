@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Link as InertiaLink, usePage } from '@inertiajs/vue3'
-import {
-    ArrowUpRight,
+import { 
     LayoutGrid,
     LogIn,
     UserPlus,
@@ -9,7 +8,7 @@ import {
 import AppHead from '@/components/AppHead.vue'
 import Container from '@/components/Container.vue'
 import JobCard from '@/components/JobCard.vue'
-import { route } from '@/utils/route'
+import { route } from '@/utils/route' 
 
 interface Job {
     id: number,
