@@ -64,12 +64,12 @@ const formatPostedDate = (value: string) => new Date(value).toLocaleDateString(u
     <section
         ref="section"
         aria-labelledby="jobs-heading"
-        class="mx-auto w-full max-w-6xl scroll-mt-8 py-14 sm:py-16"
+        class="mx-auto w-full max-w-6xl scroll-mt-16 py-14 sm:py-16"
     >
         <div class="mx-auto max-w-2xl text-center">
             <h2
                 id="jobs-heading"
-                class="text-3xl font-semibold tracking-tight text-surface-950 sm:text-4xl dark:text-white"
+                class="scroll-mt-24 text-3xl font-semibold tracking-tight text-surface-950 sm:text-4xl dark:text-white"
             >
                 Current openings
             </h2>
