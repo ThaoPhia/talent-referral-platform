@@ -1,100 +1,48 @@
 <script setup lang="ts">
 import { Link as InertiaLink, usePage } from '@inertiajs/vue3'
 import {
-    ArrowRight,
     ArrowUpRight,
-    ChartNoAxesCombined,
-    DatabaseZap,
     LayoutGrid,
-    Lock,
-    MessageSquareText,
-    Palette,
-    Rocket,
-    Server,
-    Settings,
-    Star,
+    LogIn,
     UserPlus,
-    Waypoints,
 } from '@lucide/vue'
 import AppHead from '@/components/AppHead.vue'
 import Container from '@/components/Container.vue'
-import SelectColorModeButton from '@/components/SelectColorModeButton.vue'
+import JobCard from '@/components/JobCard.vue'
 import { route } from '@/utils/route'
+
+interface Job {
+    id: number,
+    title: string,
+    description: string,
+    location: string,
+    post_on: string,
+}
 
 const props = defineProps<{
     laravelVersion: string,
     phpVersion: string,
+    jobs: Job[],
 }>()
 
 const page = usePage()
 
-const heroTagEnterClass = 'welcome-animate-enter-soft animate-duration-1200'
 const heroHeadingEnterClass = 'welcome-animate-enter-soft animate-duration-1250 [animation-delay:100ms] animate-fill-backwards'
 const heroCopyEnterClass = 'welcome-animate-enter-soft animate-duration-1250 [animation-delay:200ms] animate-fill-backwards'
 const heroActionsEnterClass = 'welcome-animate-enter-soft animate-duration-1250 [animation-delay:300ms] animate-fill-backwards'
 
-const sectionTitleEnterClass = 'welcome-animate-enter-soft-up animate-duration-1250 [animation-delay:400ms] animate-fill-backwards'
-const sectionCopyEnterClass = 'welcome-animate-enter-soft-up animate-duration-1250 [animation-delay:500ms] animate-fill-backwards'
-const ctaCardEnterClass = 'animate-enter fade-in-10 slide-in-from-b-10 animate-duration-700'
-const ctaActionsEnterClass = 'animate-enter fade-in-10 zoom-in-95 animate-duration-600 [animation-delay:180ms] animate-fill-backwards'
-const ctaMetaEnterClass = 'animate-enter fade-in-10 slide-in-from-b-4 animate-duration-600 [animation-delay:320ms] animate-fill-backwards'
+const formatPostedDate = (value: string) => new Date(value).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+})
 
-const featureCardEnterClass =
-    'animate-enter fade-in-10 slide-in-from-b-6 animate-duration-700 [animation-delay:100ms] animate-fill-backwards'
-
-const featureCards = [
-    {
-        title: 'Pre-configured authentication',
-        description: 'Registration, login, password reset, email verification, two-factor auth, and profile management are ready from the start.',
-        icon: Lock,
-    },
-    {
-        title: 'Inertia-powered navigation',
-        description: 'Move between Laravel routes with SPA smoothness while keeping the server-driven architecture that is easy to reason about.',
-        icon: Waypoints,
-    },
-    {
-        title: 'Production-ready tooling',
-        description: 'TypeScript, ESLint, auto-imported PrimeVue components, Vite, and PHPStan level 8 support give a strong baseline from day one.',
-        icon: Rocket,
-    },
-    {
-        title: 'Theme presets and color mode',
-        description: 'Adapt the starter to your product quickly with preset-driven theming and light, dark, and system-aware color mode support.',
-        icon: Palette,
-    },
-    {
-        title: 'Messaging and error feedback',
-        description: 'Session flash messages and PrimeVue toast-based error handling are already wired in for polished, SPA-friendly user feedback.',
-        icon: MessageSquareText,
-    },
-    {
-        title: 'Server-side rendering ready',
-        description: 'Ship performant first loads and a strong production baseline with SSR support included from the start.',
-        icon: Server,
-    },
-    {
-        title: 'Server-driven data workflows',
-        description: 'Paginated data and data table composables make filtering, sorting, and server-driven search query flows much faster to ship.',
-        icon: DatabaseZap,
-    },
-    {
-        title: 'Built for scale',
-        description: 'Modern Vue 3 architecture with Composition API, proper error handling, e2e type safety between PHP and TS, and security best practices built-in.',
-        icon: ChartNoAxesCombined,
-    },
-    {
-        title: 'Customizable to your needs',
-        description: 'PrimeVue theme presets, header & sidebar layouts, and Laravel-first structure make it easy to evolve the starter into your own product.',
-        icon: Settings,
-    },
-] as const
 </script>
 
 <template>
     <AppHead
-        title="Welcome"
-        description="A production-ready Laravel starter kit powered by Inertia and PrimeVue for building accessible, performant applications faster."
+        title="Talent Referral Platform"
+        description="Connect open roles with trusted candidate referrals."
     />
 
     <main
@@ -146,41 +94,19 @@ const featureCards = [
                     class="flex flex-1 items-center py-16 sm:py-20 lg:py-24"
                 >
                     <div class="mx-auto flex w-full max-w-5xl flex-col items-center text-center">
-                        <div
-                            v-animateonscroll.once="{ enterClass: heroTagEnterClass, threshold: [0.1], rootMargin: '0px 0px -10% 0px' }"
-                            class="flex gap-4"
-                        >
-                            <Tag
-                                class="backdrop-blur-sm"
-                                value="Laravel"
-                                severity="danger"
-                            />
-                            <Tag
-                                class="backdrop-blur-sm"
-                                value="Inertia"
-                                severity="info"
-                            />
-                            <Tag
-                                class="backdrop-blur-sm"
-                                value="PrimeVue"
-                                severity="success"
-                            />
-                        </div>
-
                         <h1
                             id="welcome-heading"
                             v-animateonscroll.once="{ enterClass: heroHeadingEnterClass, threshold: [0.1], rootMargin: '0px 0px -8% 0px' }"
                             class="mt-8 max-w-4xl text-5xl font-semibold tracking-tight text-balance text-surface-950 sm:text-6xl lg:text-7xl dark:text-white dark:text-shadow-lg"
                         >
-                            Laravel + PrimeVue Starter Kit
+                            Talent Referral Platform
                         </h1>
 
                         <p
                             v-animateonscroll.once="{ enterClass: heroCopyEnterClass, threshold: [0.1], rootMargin: '0px 0px -8% 0px' }"
                             class="mt-6 max-w-3xl text-base leading-8 text-surface-600 sm:text-lg dark:text-surface-300"
                         >
-                            A production-ready Laravel starter template powered by PrimeVue. Build beautiful,
-                            accessible, and performant applications in minutes, not hours.
+                            Help great candidates reach the right opportunities.
                         </p>
 
                         <nav
@@ -200,160 +126,71 @@ const featureCards = [
                                     <LayoutGrid />
                                 </template>
                             </Button>
-                            <Button
-                                v-else
-                                :as="InertiaLink"
-                                :href="route('register')"
-                                label="Sign up"
-                                size="large"
-                                raised
-                            >
-                                <template #icon>
-                                    <UserPlus />
-                                </template>
-                            </Button>
-
-                            <Button
-                                as="a"
-                                href="https://connorabbas.github.io/laravel-primevue-starter-kit-docs/"
-                                target="_blank"
-                                rel="noopener"
-                                label="Documentation"
-                                variant="outlined"
-                                severity="secondary"
-                                size="large"
-                                raised
-                            >
-                                <template #icon>
-                                    <ArrowUpRight />
-                                </template>
-                            </Button>
+                            <template v-else>
+                                <Button
+                                    :as="InertiaLink"
+                                    :href="route('register')"
+                                    label="Sign up"
+                                    size="large"
+                                    raised
+                                >
+                                    <template #icon>
+                                        <UserPlus />
+                                    </template>
+                                </Button>
+                                <Button
+                                    :as="InertiaLink"
+                                    :href="route('login')"
+                                    label="Log in"
+                                    severity="secondary"
+                                    variant="outlined"
+                                    size="large"
+                                >
+                                    <template #icon>
+                                        <LogIn />
+                                    </template>
+                                </Button>   
+                            </template>
                         </nav>
                     </div>
                 </section>
 
                 <section
-                    aria-labelledby="feature-heading"
-                    class="mx-auto w-full max-w-6xl py-6 sm:py-10 lg:py-12"
+                    aria-labelledby="jobs-heading"
+                    class="mx-auto w-full max-w-6xl py-14 sm:py-16"
                 >
                     <div class="mx-auto max-w-2xl text-center">
                         <h2
-                            id="feature-heading"
-                            v-animateonscroll.once="{ enterClass: sectionTitleEnterClass, threshold: [0.15], rootMargin: '0px 0px -6% 0px' }"
+                            id="jobs-heading"
                             class="text-3xl font-semibold tracking-tight text-surface-950 sm:text-4xl dark:text-white"
                         >
-                            Everything you need to build modern Laravel + Vue apps
+                            Current openings
                         </h2>
-                        <p
-                            v-animateonscroll.once="{ enterClass: sectionCopyEnterClass, threshold: [0.15], rootMargin: '0px 0px -6% 0px' }"
-                            class="mt-4 text-base leading-8 text-surface-600 dark:text-surface-300"
-                        >
-                            Start with a solid foundation. This starter kit includes all the essentials for building
-                            production-ready
-                            Laravel applications with PrimeVue's powerful component system.
+                        <p class="mt-4 text-base leading-8 text-surface-600 dark:text-surface-300">
+                            Explore roles that are open for applications.
                         </p>
                     </div>
 
-                    <div class="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        <Card
-                            v-for="feature in featureCards"
-                            :key="feature.title"
-                            v-animateonscroll.once="{ enterClass: featureCardEnterClass, threshold: [0.2], rootMargin: '0px 0px -8% 0px' }"
-                            class="group h-full border border-surface-200/80 bg-white/80 backdrop-blur-sm transition-transform duration-200 hover:-translate-y-1 hover:border-surface-300 dark:border-surface-800/80 dark:bg-surface-900/70 dark:hover:border-surface-700"
-                            pt:body:class="h-full"
-                            pt:content:class="flex h-full flex-col p-4"
-                        >
-                            <template #content>
-                                <div
-                                    class="flex h-14 w-14 items-center justify-center border border-surface-200 bg-surface-100 text-surface-700 [border-radius:var(--p-card-border-radius)] dark:border-surface-700 dark:bg-surface-800/80 dark:text-surface-100"
-                                >
-                                    <component
-                                        :is="feature.icon"
-                                        class="size-6!"
-                                    />
-                                </div>
-
-                                <h3 class="mt-6 text-xl font-semibold text-surface-950 dark:text-white">
-                                    {{ feature.title }}
-                                </h3>
-
-                                <p class="mt-4 mb-0 flex-1 text-base leading-7 text-muted-color">
-                                    {{ feature.description }}
-                                </p>
-                            </template>
-                        </Card>
-                    </div>
-                </section>
-
-                <section class="mx-auto w-full max-w-6xl py-14 sm:py-16">
                     <div
-                        v-animateonscroll.once="{ enterClass: ctaCardEnterClass, threshold: [0.2], rootMargin: '0px 0px -10% 0px' }"
+                        v-if="props.jobs.length"
+                        class="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3"
                     >
-                        <Card
-                            class="border border-surface-200/80 bg-white/80 backdrop-blur-sm dark:border-surface-800/80 dark:bg-surface-900/75"
-                            pt:body:class="p-0"
-                            pt:content:class="px-6 py-10 text-center sm:px-10 sm:py-12 lg:px-16 lg:py-14"
-                        >
-                            <template #content>
-                                <p
-                                    class="m-0 text-sm font-medium uppercase tracking-widest text-surface-500 dark:text-surface-400"
-                                >
-                                    Ready to build your next Laravel + Vue app?
-                                </p>
-                                <h2
-                                    class="mt-4 text-3xl font-semibold tracking-tight text-surface-950 dark:text-white sm:text-4xl"
-                                >
-                                    Discover the power of Laravel + PrimeVue
-                                </h2>
-                                <p class="mx-auto mt-4 max-w-3xl text-base leading-8 text-muted-color">
-                                    Launch with a starter that already covers the essentials.
-                                </p>
-
-                                <div
-                                    v-animateonscroll.once="{ enterClass: ctaActionsEnterClass, threshold: [0.25], rootMargin: '0px 0px -8% 0px' }"
-                                    class="mt-8 flex flex-wrap items-center justify-center gap-3"
-                                >
-                                    <Button
-                                        as="a"
-                                        href="https://connorabbas.github.io/laravel-primevue-starter-kit-docs/get-started/installation-guide.html"
-                                        target="_blank"
-                                        rel="noopener"
-                                        label="Get started"
-                                        size="large"
-                                    >
-                                        <template #icon>
-                                            <ArrowRight />
-                                        </template>
-                                    </Button>
-
-                                    <Button
-                                        as="a"
-                                        href="https://github.com/connorabbas/laravel-primevue-starter-kit"
-                                        target="_blank"
-                                        rel="noopener"
-                                        label="Star on GitHub"
-                                        variant="outlined"
-                                        severity="secondary"
-                                        size="large"
-                                    >
-                                        <template #icon>
-                                            <Star />
-                                        </template>
-                                    </Button>
-                                </div>
-
-                                <div
-                                    v-animateonscroll.once="{ enterClass: ctaMetaEnterClass, threshold: [0.25], rootMargin: '0px 0px -8% 0px' }"
-                                    class="mt-10 flex flex-col items-center justify-between gap-4 border-t border-surface-200 pt-6 text-sm text-surface-500 dark:border-surface-800 dark:text-surface-400 sm:flex-row sm:gap-6"
-                                >
-                                    <div class="">
-                                        <span>Laravel {{ props.laravelVersion }} / PHP {{ props.phpVersion }}</span>
-                                    </div>
-                                    <SelectColorModeButton :show-label="false" />
-                                </div>
-                            </template>
-                        </Card>
+                        <JobCard
+                            v-for="job in props.jobs"
+                            :key="job.id"
+                            :job="job"
+                            :posted-date="formatPostedDate(job.post_on)"
+                        />
                     </div>
+
+                    <Message
+                        v-else
+                        severity="secondary"
+                        :closable="false"
+                        class="mx-auto mt-12 max-w-2xl"
+                    >
+                        There are no active openings right now. Please check back soon.
+                    </Message>
                 </section>
             </div>
         </Container>

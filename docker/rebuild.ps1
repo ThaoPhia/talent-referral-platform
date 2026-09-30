@@ -8,9 +8,9 @@ function Get-EnvValue($name, $default) {
     return $default
 }
 
-$ImageName = Get-EnvValue 'DOCKER_IMAGE_NAME' 'laravel-inertia-primevue:latest'
-$ContainerName = Get-EnvValue 'DOCKER_CONTAINER_NAME' 'laravel-inertia-primevue'
-$VolumeName = Get-EnvValue 'DOCKER_VOLUME_NAME' 'laravel-inertia-primevue-sqlite'
+$ImageName = Get-EnvValue 'DOCKER_IMAGE_NAME' 'talent-referral-platform:latest'
+$ContainerName = Get-EnvValue 'DOCKER_CONTAINER_NAME' 'talent-referral-platform'
+$VolumeName = Get-EnvValue 'DOCKER_VOLUME_NAME' 'talent-referral-platform-sqlite'
 $Port = Get-EnvValue 'APP_PORT' '8000'
 
 Write-Host "Building image $ImageName..."

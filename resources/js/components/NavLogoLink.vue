@@ -11,6 +11,6 @@ import { Link as InertiaLink } from '@inertiajs/vue3'
         variant="link"
     >
         <ApplicationLogo class="block h-8 w-auto fill-current text-surface-900 dark:text-surface-0" />
-        <span class="font-bold">Laravel + PrimeVue Starter Kit</span>
+        <span class="font-bold">Talent Referral Platform</span>
     </Button>
 </template>

@@ -1,4 +1,6 @@
-# Laravel + PrimeVue Starter Kit
+# Talent Referral Platform
+
+A referral-driven recruiting platform where members recommend candidates for open roles and recruiters manage the resulting referrals.
 
 ## Tech Stack
 
@@ -99,19 +101,24 @@ The image name, container name, volume name, and port are all read from `.env`, 
 
 ```dotenv
 APP_PORT=8000
-DOCKER_CONTAINER_NAME=laravel-inertia-primevue
-DOCKER_IMAGE_NAME=laravel-inertia-primevue:latest
-DOCKER_VOLUME_NAME=laravel-inertia-primevue-sqlite
+    DOCKER_CONTAINER_NAME=talent-referral-platform
+    DOCKER_IMAGE_NAME=talent-referral-platform:latest
+    DOCKER_VOLUME_NAME=talent-referral-platform-sqlite
 ```
 
 Notes on how it works:
 
-- **Environment variables are not baked into the image.** `.env` is excluded via `.dockerignore`, so it must be supplied at runtime with `--env-file .env` (already handled by the rebuild script).
-- **The SQLite database persists across rebuilds.** The database file lives at `/var/www/data/database.sqlite` inside the container, backed by a named Docker volume (`laravel-inertia-primevue-sqlite`) rather than the image itself. This keeps rebuilds reproducible (no dev data baked into the image) while preserving your data between rebuilds. On container startup, [`docker/local/web/entrypoint.sh`](docker/local/web/entrypoint.sh) creates the database file if missing and runs `php artisan migrate --force`.
-- To wipe the database entirely, remove the volume: `docker volume rm laravel-inertia-primevue-sqlite`.
-- This is separate from `docker-compose.dev.yml`, which sets up a Postgres-backed dev environment (e.g. for use with a dev container / Sail-style workflow) instead of this SQLite-based image.
+## Project requirements
+    Tables: 
+        users(type: admin, normal/referrer)
+            referrer (name, email, resume URL, note)
+        jobs(title, description, location, post, date, status(active, archived))
+        referrals (date, user_id, referrer_id, job_id, status(pending, accepted, rejected))
+    Usages:
+        Backend: Admin create/edit/view jobs; Admin view/edit referrals 
+        Front-end: 
+            Guest/member search/view jobs; 
+            Only member can click on "Refer a candidate" button when viewing a job listing
 
-> [!WARNING]
-> Before adopting this starter kit, be aware that it is designed for [PrimeVue v4](https://v4.primevue.org/), the final MIT-licensed open source release. PrimeTek has announced that PrimeVue v5 will transition to the [new PrimeUI licensing model](https://primeui.dev/pricing) and will no longer be released as open source. As a result, this starter kit does not plan to migrate to PrimeVue v5.
->
-> Consider migrating the PrimeVue packages to use [OpenVue](https://openvue.dev/), or use the [Laravel Nuxt UI Starter Kit](https://github.com/connorabbas/laravel-nuxtui-starter-kit) as an alternative.
+
+

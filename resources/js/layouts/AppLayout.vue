@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<{
     breadcrumbs?: MenuItem[],
 }>(), {
     breadcrumbs: () => [],
-    description: 'Manage your account, settings, and application workspace in this Laravel and PrimeVue starter kit.',
+    description: 'Manage your referrals and recruiting workspace.',
 })
 </script>
 

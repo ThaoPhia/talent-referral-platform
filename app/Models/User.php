@@ -19,6 +19,23 @@ class User extends Authenticatable implements MustVerifyEmail
     use Notifiable;
     use TwoFactorAuthenticatable;
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $user): void {
+            $user->type ??= 'normal';
+        });
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->type === 'admin';
+    }
+
+    public function isMember(): bool
+    {
+        return $this->type === 'normal';
+    }
+
     /**
      * Get the attributes that should be cast.
      *

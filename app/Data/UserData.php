@@ -15,11 +15,11 @@ class UserData extends Data
         public int $id,
         public string $name,
         public string $email,
+        public string $type,
         public ?CarbonImmutable $emailVerifiedAt,
         public CarbonImmutable $createdAt,
         public CarbonImmutable $updatedAt,
-    ) {
-    }
+    ) {}
 
     public static function fromModel(User $user): self
     {
@@ -34,6 +34,7 @@ class UserData extends Data
             id: $user->id,
             name: $user->name,
             email: $user->email,
+            type: $user->type,
             emailVerifiedAt: $user->email_verified_at,
             createdAt: $createdAt,
             updatedAt: $updatedAt,

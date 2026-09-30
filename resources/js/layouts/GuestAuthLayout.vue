@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<{
     title: string,
     description?: string,
 }>(), {
-    description: 'Access authentication and account recovery pages for this Laravel and PrimeVue starter kit.',
+    description: 'Access your Talent Referral Platform account.',
 })
 </script>
 

@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "connora/laravel-primevue-starter-kit",
+    "name": "connora/talent-referral-platform",
     "type": "project",
-    "description": "Laravel + PrimeVue Starter Kit",
+    "description": "Referral-driven recruiting platform",
     "keywords": [
         "laravel",
         "framework"
