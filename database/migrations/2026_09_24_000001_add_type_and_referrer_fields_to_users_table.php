@@ -26,7 +26,8 @@ return new class() extends Migration {
             'name' => 'Phia User',
             'email' => 'thoj.phia+user@gmail.com',
             'password' => bcrypt('password'),
-            'type' => 'referrer',
+            // Converted to 'referrer' by 2026_09_29_000001_add_referrer_type_to_users_table.
+            'type' => 'normal',
             'email_verified_at' => now(),
         ]);
     }

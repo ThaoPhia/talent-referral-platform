@@ -2,6 +2,7 @@
 <html
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
     @class(['dark'=> request()->cookie('colorScheme', 'auto') === 'dark'])
+data-color-scheme="{{ request()->cookie('colorScheme', 'auto') }}"
 >
 
 <head>
@@ -13,9 +14,7 @@
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
     <script>
         (function() {
-            const colorScheme = '{{ request()->cookie('
-            colorScheme ', '
-            auto ') }}'
+            const colorScheme = document.documentElement.dataset.colorScheme
             if (colorScheme === 'dark' || (colorScheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark')
             } else {
