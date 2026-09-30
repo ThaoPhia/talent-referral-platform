@@ -9,6 +9,8 @@ storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*
 database/database.sqlite
+public/hot
+public/fonts-manifest.dev.json
 npm-debug.log*
 Dockerfile
 .dockerignore

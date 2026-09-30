@@ -32,6 +32,8 @@ Write-Host "Ensuring database volume exists..."
 docker volume create $VolumeName | Out-Null
 
 Write-Host "Starting container from new image..."
-docker run -d --name $ContainerName -p "${Port}:80" --env-file .env -e "APP_URL=http://localhost:$Port" -v "${VolumeName}:/var/www/data" $ImageName
+# Mount public/ so Laravel sees Vite's live hot file and dev fonts manifest.
+$PublicPath = Join-Path $PWD 'public'
+docker run -d --name $ContainerName -p "${Port}:80" --env-file .env -e "APP_URL=http://localhost:$Port" -v "${VolumeName}:/var/www/data" -v "${PublicPath}:/var/www/html/public" $ImageName
 
 Write-Host "Done. App is available at http://localhost:$Port"

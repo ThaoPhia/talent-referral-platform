@@ -66,7 +66,7 @@ watch(
 
         <template #title>
             <div class="text-center">
-                Log in to your account
+                Welcome back recruiters!
             </div>
         </template>
 
