@@ -90,7 +90,7 @@ const openReferralForm = () => {
         return
     }
 
-    if (page.props.auth.user.type !== 'normal') {
+    if (page.props.auth.user.type !== 'referrer') {
         memberOnlyDialogOpen.value = true
         return
     }
@@ -313,11 +313,11 @@ const closeReferralDialog = () => {
     <Dialog
         v-model:visible="memberOnlyDialogOpen"
         modal
-        header="Member access required"
+        header="Referrer access required"
         class="w-full max-w-md"
     >
         <p class="m-0 text-muted-color">
-            Only member accounts can submit candidate referrals.
+            Only referrer accounts can submit candidate referrals.
         </p>
         <template #footer>
             <Button

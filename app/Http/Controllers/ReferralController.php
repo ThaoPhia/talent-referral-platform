@@ -39,13 +39,13 @@ class ReferralController extends Controller
 
             if (! $candidate->exists) {
                 $candidate->password = Hash::make(Str::random(40));
+                $candidate->type = 'normal';
             }
 
             $candidate->forceFill([
                 'name' => $request->string('candidate_name')->toString(),
                 'resume_url' => $request->string('resume_url')->toString(),
                 'note' => $request->string('note')->toString(),
-                'type' => 'normal',
             ])->save();
 
             Referral::create([

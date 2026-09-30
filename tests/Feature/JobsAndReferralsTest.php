@@ -96,7 +96,7 @@ class JobsAndReferralsTest extends TestCase
     public function test_member_can_create_a_referral(): void
     {
         $member = User::factory()->create();
-        $member->forceFill(['type' => 'normal'])->save();
+        $member->forceFill(['type' => 'referrer'])->save();
         $candidate = User::factory()->create();
         $job = Job::create([
             'title' => 'Senior Engineer',
@@ -120,6 +120,51 @@ class JobsAndReferralsTest extends TestCase
             'job_id' => $job->id,
             'status' => 'pending',
         ]);
+    }
+
+    public function test_new_referral_candidate_is_created_as_normal_user(): void
+    {
+        $referrer = User::factory()->create();
+        $job = Job::create([
+            'title' => 'Senior Engineer',
+            'description' => 'Build great things.',
+            'location' => 'Remote',
+            'post_on' => '2026-09-24 09:00:00',
+        ]);
+
+        $this->actingAs($referrer)->post(route('referrals.store'), [
+            'candidate_name' => 'New Candidate',
+            'candidate_email' => 'candidate@example.com',
+            'resume_url' => 'https://example.com/resume.pdf',
+            'note' => 'Strong candidate.',
+            'job_id' => $job->id,
+        ])->assertRedirect();
+
+        $this->assertSame('referrer', $referrer->fresh()->type);
+        $this->assertDatabaseHas('users', [
+            'email' => 'candidate@example.com',
+            'type' => 'normal',
+        ]);
+    }
+
+    public function test_normal_user_cannot_create_a_referral(): void
+    {
+        $candidate = User::factory()->create();
+        $candidate->forceFill(['type' => 'normal'])->save();
+        $job = Job::create([
+            'title' => 'Senior Engineer',
+            'description' => 'Build great things.',
+            'location' => 'Remote',
+            'post_on' => '2026-09-24 09:00:00',
+        ]);
+
+        $this->actingAs($candidate)->post(route('referrals.store'), [
+            'candidate_name' => 'Someone Else',
+            'candidate_email' => 'someone@example.com',
+            'resume_url' => 'https://example.com/resume.pdf',
+            'note' => 'Strong candidate.',
+            'job_id' => $job->id,
+        ])->assertForbidden();
     }
 
     public function test_admin_cannot_create_a_referral(): void

@@ -23,7 +23,7 @@ class DashboardTest extends TestCase
     public function test_members_can_access_the_member_dashboard(): void
     {
         $member = User::factory()->create();
-        $member->forceFill(['type' => 'normal'])->save();
+        $member->forceFill(['type' => 'referrer'])->save();
 
         $this->actingAs($member)
             ->get(route('dashboard'))
@@ -33,7 +33,7 @@ class DashboardTest extends TestCase
     public function test_members_cannot_access_the_admin_dashboard(): void
     {
         $member = User::factory()->create();
-        $member->forceFill(['type' => 'normal'])->save();
+        $member->forceFill(['type' => 'referrer'])->save();
 
         $this->actingAs($member)
             ->get(route('admin.dashboard'))

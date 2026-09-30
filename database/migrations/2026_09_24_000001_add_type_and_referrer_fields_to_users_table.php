@@ -26,7 +26,7 @@ return new class() extends Migration {
             'name' => 'Phia User',
             'email' => 'thoj.phia+user@gmail.com',
             'password' => bcrypt('password'),
-            'type' => 'normal',
+            'type' => 'referrer',
             'email_verified_at' => now(),
         ]);
     }
