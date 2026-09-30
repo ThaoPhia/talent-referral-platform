@@ -9,12 +9,11 @@ import AppHead from '@/components/AppHead.vue'
 import Container from '@/components/Container.vue'
 import JobListing from '@/components/JobListing.vue'
 import { route } from '@/utils/route' 
-import type { Job } from '@/types'
+import type { Job, LengthAwarePaginator } from '@/types'
 
 const props = defineProps<{
-    laravelVersion: string,
-    phpVersion: string,
-    jobs: Job[],
+    jobs: LengthAwarePaginator<Job>,
+    search: string,
 }>()
 
 const page = usePage()
@@ -140,7 +139,10 @@ const heroActionsEnterClass = 'welcome-animate-enter-soft animate-duration-1250 
                     </div>
                 </section>
 
-                <JobListing :jobs="props.jobs" />
+                <JobListing
+                    :jobs="props.jobs"
+                    :search="props.search"
+                />
             </div>
         </Container>
     </main>
