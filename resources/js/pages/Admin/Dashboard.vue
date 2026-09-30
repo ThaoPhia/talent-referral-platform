@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { Link as InertiaLink } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import AdminBreadcrumbs from '@/components/admin/AdminBreadcrumbs.vue'
 import { route } from '@/utils/route'
-
-const breadcrumbs = [{ label: 'Admin Dashboard' }]
 </script>
 
 <template>
     <AppLayout
         title="Admin Dashboard"
         description="Manage jobs and referrals."
-        :breadcrumbs
     >
+        <AdminBreadcrumbs />
         <Card>
             <template #content>
                 <div class="flex flex-col gap-2">

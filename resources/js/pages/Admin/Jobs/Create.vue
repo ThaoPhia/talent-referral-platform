@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import JobForm from '@/components/JobForm.vue'
+import AdminBreadcrumbs from '@/components/admin/AdminBreadcrumbs.vue'
 import { route } from '@/utils/route'
 
 const breadcrumbs = [
-    { label: 'Admin Dashboard', route: route('admin.dashboard') },
     { label: 'Jobs', route: route('admin.jobs.index') },
     { label: 'Add job' },
 ]
@@ -14,8 +14,8 @@ const breadcrumbs = [
     <AppLayout
         title="Add job"
         description="Create a new job listing."
-        :breadcrumbs
     >
+        <AdminBreadcrumbs :items="breadcrumbs" />
         <Card>
             <template #title>
                 Add job

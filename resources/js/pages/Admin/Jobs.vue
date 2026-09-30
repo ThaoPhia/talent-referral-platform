@@ -2,6 +2,7 @@
 import { Link as InertiaLink } from '@inertiajs/vue3'
 import { Pencil, Plus } from '@lucide/vue'
 import AppLayout from '@/layouts/AppLayout.vue'
+import AdminBreadcrumbs from '@/components/admin/AdminBreadcrumbs.vue'
 import { route } from '@/utils/route'
 
 const props = defineProps<{
@@ -13,19 +14,14 @@ const props = defineProps<{
         status: 'active' | 'archived',
     }>,
 }>()
-
-const breadcrumbs = [
-    { label: 'Admin Dashboard', route: route('admin.dashboard') },
-    { label: 'Jobs' },
-]
 </script>
 
 <template>
     <AppLayout
         title="Jobs"
         description="Manage job listings."
-        :breadcrumbs
     >
+        <AdminBreadcrumbs :items="[{ label: 'Jobs' }]" />
         <Card>
             <template #content>
                 <div class="flex flex-col gap-4">
@@ -45,7 +41,7 @@ const breadcrumbs = [
                         </Button>
                     </div>
 
-                    <DataTable :value="props.jobs" stripedRows>
+                    <DataTable v-if="props.jobs.length" :value="props.jobs" stripedRows>
                         <Column field="title" header="Title" />
                         <Column field="location" header="Location" />
                         <Column field="post_on" header="Posted" />
@@ -67,6 +63,9 @@ const breadcrumbs = [
                             </template>
                         </Column>
                     </DataTable>
+                    <div v-else>
+                        <p class="m-0 text-muted-color text-center my-4">No job listings found.</p>
+                    </div>
                 </div>
             </template>
         </Card>

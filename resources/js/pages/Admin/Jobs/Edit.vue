@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import JobForm from '@/components/JobForm.vue'
+import AdminBreadcrumbs from '@/components/admin/AdminBreadcrumbs.vue'
 import { route } from '@/utils/route'
 
 interface Job {
@@ -17,7 +18,6 @@ const props = defineProps<{
 }>()
 
 const breadcrumbs = [
-    { label: 'Admin Dashboard', route: route('admin.dashboard') },
     { label: 'Jobs', route: route('admin.jobs.index') },
     { label: 'Edit job' },
 ]
@@ -27,8 +27,8 @@ const breadcrumbs = [
     <AppLayout
         title="Edit job"
         description="Update an existing job listing."
-        :breadcrumbs
     >
+        <AdminBreadcrumbs :items="breadcrumbs" />
         <Card>
             <template #title>
                 Edit job

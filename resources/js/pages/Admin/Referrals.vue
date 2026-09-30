@@ -1,24 +1,19 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import ReferralList from '@/components/ReferralList.vue'
-import { route } from '@/utils/route'
+import AdminBreadcrumbs from '@/components/admin/AdminBreadcrumbs.vue'
 
 const props = defineProps<{
     referrals: Array<Record<string, unknown>>
 }>()
-
-const breadcrumbs = [
-    { label: 'Admin Dashboard', route: route('admin.dashboard') },
-    { label: 'Referrals' },
-]
 </script>
 
 <template>
     <AppLayout
         title="Referrals"
         description="Review and update candidate referrals."
-        :breadcrumbs
     >
+        <AdminBreadcrumbs :items="[{ label: 'Referrals' }]" />
         <Card>
             <template #content>
                 <div class="flex flex-col gap-4">
