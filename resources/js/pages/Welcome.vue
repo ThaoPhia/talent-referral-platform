@@ -7,16 +7,9 @@ import {
 } from '@lucide/vue'
 import AppHead from '@/components/AppHead.vue'
 import Container from '@/components/Container.vue'
-import JobCard from '@/components/JobCard.vue'
+import JobListing from '@/components/JobListing.vue'
 import { route } from '@/utils/route' 
-
-interface Job {
-    id: number,
-    title: string,
-    description: string,
-    location: string,
-    post_on: string,
-}
+import type { Job } from '@/types'
 
 const props = defineProps<{
     laravelVersion: string,
@@ -29,13 +22,6 @@ const page = usePage()
 const heroHeadingEnterClass = 'welcome-animate-enter-soft animate-duration-1250 [animation-delay:100ms] animate-fill-backwards'
 const heroCopyEnterClass = 'welcome-animate-enter-soft animate-duration-1250 [animation-delay:200ms] animate-fill-backwards'
 const heroActionsEnterClass = 'welcome-animate-enter-soft animate-duration-1250 [animation-delay:300ms] animate-fill-backwards'
-
-const formatPostedDate = (value: string) => new Date(value).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-})
-
 </script>
 
 <template>
@@ -154,43 +140,7 @@ const formatPostedDate = (value: string) => new Date(value).toLocaleDateString(u
                     </div>
                 </section>
 
-                <section
-                    aria-labelledby="jobs-heading"
-                    class="mx-auto w-full max-w-6xl py-14 sm:py-16"
-                >
-                    <div class="mx-auto max-w-2xl text-center">
-                        <h2
-                            id="jobs-heading"
-                            class="text-3xl font-semibold tracking-tight text-surface-950 sm:text-4xl dark:text-white"
-                        >
-                            Current openings
-                        </h2>
-                        <p class="mt-4 text-base leading-8 text-surface-600 dark:text-surface-300">
-                            Explore roles that are open for applications.
-                        </p>
-                    </div>
-
-                    <div
-                        v-if="props.jobs.length"
-                        class="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3"
-                    >
-                        <JobCard
-                            v-for="job in props.jobs"
-                            :key="job.id"
-                            :job="job"
-                            :posted-date="formatPostedDate(job.post_on)"
-                        />
-                    </div>
-
-                    <Message
-                        v-else
-                        severity="secondary"
-                        :closable="false"
-                        class="mx-auto mt-12 max-w-2xl"
-                    >
-                        There are no active openings right now. Please check back soon.
-                    </Message>
-                </section>
+                <JobListing :jobs="props.jobs" />
             </div>
         </Container>
     </main>

@@ -5,14 +5,7 @@ import { useResizeObserver } from '@vueuse/core'
 import InputErrors from '@/components/InputErrors.vue'
 import { useToast } from 'primevue/usetoast'
 import { route } from '@/utils/route'
-
-interface Job {
-    id: number,
-    title: string,
-    description: string,
-    location: string,
-    post_on: string,
-}
+import type { Job } from '@/types'
 
 const props = defineProps<{
     job: Job,
