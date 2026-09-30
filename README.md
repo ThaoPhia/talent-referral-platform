@@ -2,8 +2,6 @@
 
 A referral-driven recruiting platform where members recommend candidates for open roles and recruiters manage the resulting referrals.
 
-This project is more of a starter kit than a complete, production-ready application. It provides the foundation and core flows to build on, not a fully working product.
-
 ## Tech Stack
 
 - **Backend:** Laravel 13, PHP 8.3+, Laravel Fortify
