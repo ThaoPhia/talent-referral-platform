@@ -24,27 +24,27 @@ export function useAppLayout() {
             route: route('dashboard'),
             active: currentRoute.value == 'dashboard',
         },
-        {
-            key: 'resources',
-            label: 'Resources',
-            lucideIcon: Info,
-            items: [
-                {
-                    key: 'resources-laravel',
-                    label: 'Laravel Docs',
-                    url: 'https://laravel.com/docs/master',
-                    target: '_blank',
-                    lucideIcon: ExternalLink,
-                },
-                {
-                    key: 'resources-primevue',
-                    label: 'PrimeVue Docs',
-                    url: 'https://v4.primevue.org/',
-                    target: '_blank',
-                    lucideIcon: ExternalLink,
-                },
-            ],
-        },
+        // {
+        //     key: 'resources',
+        //     label: 'Resources',
+        //     lucideIcon: Info,
+        //     items: [
+        //         {
+        //             key: 'resources-laravel',
+        //             label: 'Laravel Docs',
+        //             url: 'https://laravel.com/docs/master',
+        //             target: '_blank',
+        //             lucideIcon: ExternalLink,
+        //         },
+        //         {
+        //             key: 'resources-primevue',
+        //             label: 'PrimeVue Docs',
+        //             url: 'https://v4.primevue.org/',
+        //             target: '_blank',
+        //             lucideIcon: ExternalLink,
+        //         },
+        //     ],
+        // },
     ])
 
     // Check/set expanded PanelMenu items based on active status, for non-persistent layouts

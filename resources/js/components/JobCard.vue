@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { Link as InertiaLink, useForm, usePage } from '@inertiajs/vue3'
+import { useResizeObserver } from '@vueuse/core'
 import InputErrors from '@/components/InputErrors.vue'
 import { useToast } from 'primevue/usetoast'
 import { route } from '@/utils/route'
@@ -20,9 +21,53 @@ const props = defineProps<{
 
 const page = usePage()
 const toast = useToast()
+const jobDialogOpen = ref(false)
 const referralDialogOpen = ref(false)
 const loginDialogOpen = ref(false)
 const memberOnlyDialogOpen = ref(false)
+
+// Computed property for capitalized location
+const location = computed(() => props.job.location.charAt(0).toUpperCase() + props.job.location.slice(1))
+
+// Template ref and description fitting logic
+const descriptionRef = useTemplateRef<HTMLParagraphElement>('description')
+const displayedDescription = ref(props.job.description)
+let measureCanvas: HTMLCanvasElement | undefined
+
+const fitDescription = () => {
+    const el = descriptionRef.value
+    const context = el && (measureCanvas ??= document.createElement('canvas')).getContext('2d')
+    if (!el || !context) {
+        return
+    }
+
+    const style = getComputedStyle(el)
+    context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+    const fits = (text: string) => context.measureText(text).width <= el.clientWidth
+
+    const full = props.job.description.trim().replace(/\s+/g, ' ')
+    if (fits(full)) {
+        displayedDescription.value = full
+        return
+    }
+
+    const words = full.split(' ')
+    let low = 1
+    let high = words.length - 1
+    while (low < high) {
+        const mid = Math.ceil((low + high) / 2)
+        if (fits(`${words.slice(0, mid).join(' ')}…`)) {
+            low = mid
+        } else {
+            high = mid - 1
+        }
+    }
+    displayedDescription.value = `${words.slice(0, low).join(' ')}…`
+}
+
+useResizeObserver(descriptionRef, fitDescription)
+watch(() => props.job.description, fitDescription)
+onMounted(() => document.fonts.ready.then(fitDescription))
 
 const referralForm = useForm({
     job_id: 0,
@@ -45,6 +90,8 @@ watch(
 )
 
 const openReferralForm = () => {
+    jobDialogOpen.value = false
+
     if (!page.props.auth.user) {
         loginDialogOpen.value = true
         return
@@ -99,20 +146,64 @@ const closeReferralDialog = () => {
             {{ props.job.title }}
         </template>
         <template #subtitle>
-            {{ props.job.location }} · Posted {{ props.postedDate }}
+            {{ location }} · Posted {{ props.postedDate }}
         </template>
         <template #content>
-            <p class="m-0 line-clamp-4 leading-7 text-muted-color">
-                {{ props.job.description }}
+            <p
+                ref="description"
+                class="m-0 truncate leading-7 text-muted-color"
+            >
+                {{ displayedDescription }}
             </p>
+
+            <div class="flex gap-4 mt-6">
+                <Button
+                    class="flex-1"
+                    label="View Job"
+                    severity="secondary"
+                    variant="outlined"
+                    @click="jobDialogOpen = true"
+                />
+                <Button
+                    class="flex-1 whitespace-nowrap"
+                    label="Refer a candidate"
+                    @click="openReferralForm"
+                />
+            </div> 
+        </template>
+    </Card>
+
+    <!-- Job Details Dialog -->
+    <Dialog
+        v-model:visible="jobDialogOpen"
+        modal
+        :header="props.job.title"
+        class="w-full max-w-2xl"
+    >
+        <div class="space-y-4">
+            <p class="m-0 text-muted-color">
+                {{ location }} · Posted {{ props.postedDate }}
+            </p>
+            <p
+                class="m-0 leading-7 whitespace-pre-line"
+                v-text="props.job.description"
+            />
+        </div>
+        <template #footer>
             <Button
-                class="mt-6"
+                label="Close"
+                severity="secondary"
+                variant="outlined"
+                @click="jobDialogOpen = false"
+            />
+            <Button
                 label="Refer a candidate"
                 @click="openReferralForm"
             />
         </template>
-    </Card>
+    </Dialog>
 
+    <!-- Referral Dialog -->
     <Dialog
         v-model:visible="referralDialogOpen"
         modal
@@ -199,6 +290,7 @@ const closeReferralDialog = () => {
         </form>
     </Dialog>
 
+    <!-- Login Dialog -->
     <Dialog
         v-model:visible="loginDialogOpen"
         modal
@@ -223,7 +315,8 @@ const closeReferralDialog = () => {
             />
         </template>
     </Dialog>
-
+    
+    <!-- Member Only Dialog -->
     <Dialog
         v-model:visible="memberOnlyDialogOpen"
         modal
