@@ -6,14 +6,18 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Fortify\Contracts\TwoFactorConfirmedResponse as TwoFactorConfirmedResponseContract;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
@@ -21,6 +25,17 @@ class FortifyServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->instance(RegisterResponseContract::class, new class() implements RegisterResponseContract {
+            public function toResponse($request)
+            {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('login')->with('status', 'Your referrer account is inactive. Please wait for activation before logging in.');
+            }
+        });
+
         $this->app->instance(
             TwoFactorConfirmedResponseContract::class,
             new class() implements TwoFactorConfirmedResponseContract {
@@ -47,6 +62,14 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
+        Fortify::authenticateUsing(function (Request $request): ?User {
+            $user = User::where('email', $request->input(Fortify::username()))->first();
+
+            // Only allow authentication if the user is active
+            return $user && $user->status === 'active' && Hash::check($request->input('password'), $user->password)
+                ? $user
+                : null;
+        });
     }
 
     private function configureViews(): void

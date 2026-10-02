@@ -31,18 +31,18 @@ onMounted(() => {
 
 <template>
     <GuestAuthLayout
-        title="Register"
-        description="Create a new account to start using this Laravel and PrimeVue application."
+        title="Become a referrer"
+        description="Create a referrer account to recommend candidates for open roles."
     >
         <template #title>
             <div class="text-center">
-                Create an account
+                Become a referrer
             </div>
         </template>
 
         <template #subtitle>
             <div class="text-center">
-                Enter your details below to create your account
+                Create an account to recommend candidates. Access begins after activation.
             </div>
         </template>
 

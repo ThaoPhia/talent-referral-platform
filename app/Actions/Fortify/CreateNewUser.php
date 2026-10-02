@@ -28,10 +28,12 @@ class CreateNewUser implements CreatesNewUsers
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
         ])->validate();
 
-        return User::create([
+        return User::forceCreate([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'type' => 'referrer',
+            'status' => 'inactive',
         ]);
     }
 }

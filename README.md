@@ -122,5 +122,8 @@ Notes on how it works:
             Guest/member search/view jobs; 
             Only member can click on "Refer a candidate" button when viewing a job listing
 
-
+## TODOs
+- Add need for confirmation for referrer sign-up. Admin need to approved first. Otherwise, account is not active yet.
+- Implement referral accept/reject email and endpoints
+- Dashboard for normal user to view referral history
 
