@@ -32,7 +32,7 @@ class FortifyServiceProvider extends ServiceProvider
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                return redirect()->route('login')->with('status', 'Your referrer account is inactive. Please wait for activation before logging in.');
+                return redirect()->route('login')->with('status', 'Your referrer application is pending review. We will email you when it is approved.');
             }
         });
 

@@ -125,5 +125,9 @@ Notes on how it works:
 ## TODOs
 - Add need for confirmation for referrer sign-up. Admin need to approved first. Otherwise, account is not active yet.
 - Implement referral accept/reject email and endpoints
+- Change to use policy for admin restrictions
+- On referrer sent, add email to be send and view job with accept or denied... 
+    - then maybe in the future add application (Internal/external)
+    - User doesn't need to logged in, it just need a token to acknowledge it's that person
 - Dashboard for normal user to view referral history
 

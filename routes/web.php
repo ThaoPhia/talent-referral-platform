@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminReferrerController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\WelcomeController;
@@ -24,6 +25,10 @@ Route::middleware(['auth', 'verified'])
     ->name('admin.')
     ->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+        Route::get('/referrers', [AdminReferrerController::class, 'index'])->name('referrers.index');
+        Route::get('/referrers/{referrer}', [AdminReferrerController::class, 'show'])->name('referrers.show');
+        Route::post('/referrers/{referrer}/approve', [AdminReferrerController::class, 'approve'])->name('referrers.approve');
+        Route::post('/referrers/{referrer}/deny', [AdminReferrerController::class, 'deny'])->name('referrers.deny');
         Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
         Route::get('/jobs/create', [JobController::class, 'create'])->name('jobs.create');
         Route::post('/jobs', [JobController::class, 'store'])->name('jobs.store');

@@ -3,6 +3,9 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Mail\ReferrerSignupAlert;
+use App\Notifications\ReferrerSignupReceived;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -28,12 +31,22 @@ class CreateNewUser implements CreatesNewUsers
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
         ])->validate();
 
-        return User::forceCreate([
+        $user = User::forceCreate([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
             'type' => 'referrer',
-            'status' => 'inactive',
+            'status' => 'pending',
         ]);
+
+        $user->notify(new ReferrerSignupReceived);
+        $adminEmails = User::query()->where('type', 'admin')->where('status', 'active')->pluck('email');
+        if ($adminEmails->isNotEmpty()) {
+            Mail::to($adminEmails->first())
+                ->bcc($adminEmails->slice(1)->all())
+                ->send(new ReferrerSignupAlert($user));
+        }
+
+        return $user;
     }
 }

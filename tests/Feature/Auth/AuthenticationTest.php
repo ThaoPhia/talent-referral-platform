@@ -43,6 +43,22 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_pending_and_denied_referrers_cannot_authenticate(): void
+    {
+        $user = User::factory()->create();
+
+        foreach (['pending', 'denied'] as $status) {
+            $user->forceFill(['status' => $status])->save();
+
+            $this->post('/login', [
+                'email' => $user->email,
+                'password' => 'password',
+            ])->assertSessionHasErrors('email');
+
+            $this->assertGuest();
+        }
+    }
+
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
         $user = User::factory()->create();
