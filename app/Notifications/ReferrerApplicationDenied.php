@@ -19,8 +19,8 @@ class ReferrerApplicationDenied extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Your referrer application')
+            ->subject('Your recruiter application')
             ->greeting('Hello,')
-            ->line('Thank you for your interest. Your referrer application was not approved.');
+            ->line('Thank you for your interest. Your recruiter application was not approved.');
     }
 }

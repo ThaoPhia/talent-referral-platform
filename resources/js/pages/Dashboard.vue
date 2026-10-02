@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import ReferralList from '@/components/ReferralList.vue'
+import type { Referral } from '@/types'
 
 defineProps<{
-    referrals: Array<Record<string, unknown>>
+    referrals: Referral[]
 }>()
 
 const breadcrumbs = [{ label: 'Dashboard' }]

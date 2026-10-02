@@ -28,6 +28,10 @@ class RegistrationTest extends TestCase
     {
         Notification::fake();
         Mail::fake();
+        $this->assertDatabaseHas('users', [
+            'email' => 'thoj.phia+user@gmail.com',
+            'type' => 'recruiter',
+        ]);
         $admin = User::where('type', 'admin')->firstOrFail();
         $secondAdmin = User::factory()->create();
         $secondAdmin->forceFill(['type' => 'admin', 'status' => 'active'])->save();
@@ -45,7 +49,7 @@ class RegistrationTest extends TestCase
         $response->assertRedirect(route('login'));
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
-            'type' => 'referrer',
+            'type' => 'recruiter',
             'status' => 'pending',
         ]);
         $this->assertSame('pending', User::where('email', 'test@example.com')->firstOrFail()->status);
@@ -58,7 +62,7 @@ class RegistrationTest extends TestCase
             $mail->hasTo($admin->email)
                 && $mail->hasBcc($secondAdmin->email)
                 && ! $mail->hasBcc($inactiveAdmin->email)
-                && str_contains($mail->render(), route('admin.referrers.show', $referrer))
+                && str_contains($mail->render(), route('admin.recruiters.show', $referrer))
         );
         Mail::assertSentCount(1);
         Notification::assertNotSentTo($referrer, VerifyEmail::class);
@@ -92,20 +96,20 @@ class RegistrationTest extends TestCase
         $admin = User::where('type', 'admin')->firstOrFail();
         $referrer = User::factory()->create();
 
-        $this->actingAs($referrer)->get(route('admin.referrers.show', $referrer))->assertForbidden();
-        $this->actingAs($referrer)->post(route('admin.referrers.approve', $referrer))->assertForbidden();
+        $this->actingAs($referrer)->get(route('admin.recruiters.show', $referrer))->assertForbidden();
+        $this->actingAs($referrer)->post(route('admin.recruiters.approve', $referrer))->assertForbidden();
 
         $referrer->forceFill(['email_verified_at' => null])->save();
-        $this->actingAs($admin)->get(route('admin.referrers.index'))->assertOk();
-        $this->get(route('admin.referrers.show', $referrer))
-            ->assertInertia(fn($page) => $page->component('Admin/Referrer')
-                ->where('referrer.email', $referrer->email)
-                ->where('referrer.status', 'pending'));
+        $this->actingAs($admin)->get(route('admin.recruiters.index'))->assertOk();
+        $this->get(route('admin.recruiters.show', $referrer))
+            ->assertInertia(fn($page) => $page->component('Admin/Recruiter')
+                ->where('recruiter.email', $referrer->email)
+                ->where('recruiter.status', 'pending'));
 
-        $this->post(route('admin.referrers.approve', $referrer))->assertRedirect();
+        $this->post(route('admin.recruiters.approve', $referrer))->assertRedirect();
         $this->assertSame('active', $referrer->fresh()->status);
         Notification::assertSentTo($referrer, VerifyEmail::class, 1);
-        $this->post(route('admin.referrers.deny', $referrer))->assertStatus(409);
+        $this->post(route('admin.recruiters.deny', $referrer))->assertStatus(409);
     }
 
     public function test_only_pending_referrers_can_be_denied(): void
@@ -114,10 +118,10 @@ class RegistrationTest extends TestCase
         $admin = User::where('type', 'admin')->firstOrFail();
         $referrer = User::factory()->create();
 
-        $this->actingAs($admin)->post(route('admin.referrers.deny', $referrer))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.recruiters.deny', $referrer))->assertRedirect();
         $this->assertSame('denied', $referrer->fresh()->status);
         Notification::assertSentTo($referrer, ReferrerApplicationDenied::class);
-        $this->post(route('admin.referrers.approve', $referrer))->assertStatus(409);
+        $this->post(route('admin.recruiters.approve', $referrer))->assertStatus(409);
     }
 
     public function test_verification_follows_activation_from_any_status_change(): void

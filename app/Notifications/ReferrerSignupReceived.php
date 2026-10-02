@@ -19,9 +19,9 @@ class ReferrerSignupReceived extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('We received your referrer application')
+            ->subject('We received your recruiter application')
             ->greeting('Hello,')
-            ->line('Your referrer account is pending review.')
+            ->line('Your recruiter account is pending review.')
             ->line('We will let you know when an administrator has reviewed your application.');
     }
 }

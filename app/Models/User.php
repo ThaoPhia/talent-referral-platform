@@ -22,7 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected static function booted(): void
     {
         static::creating(function (self $user): void {
-            $user->type ??= 'referrer';
+            $user->type ??= 'recruiter';
         });
     }
 
@@ -31,9 +31,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->type === 'admin';
     }
 
-    public function isReferrer(): bool
+    public function isRecruiter(): bool
     {
-        return $this->type === 'referrer';
+        return $this->type === 'recruiter';
     }
 
     /**

@@ -1,9 +1,9 @@
 <x-mail::message>
-# New referrer application
+    # New recruiter application
 
-{{ $referrer->name }} ({{ $referrer->email }}) signed up as a referrer.
+    {{ $referrer->name }} ({{ $referrer->email }}) signed up as a recruiter.
 
-<x-mail::button :url="route('admin.referrers.show', $referrer)">
-Review referrer
-</x-mail::button>
+    <x-mail::button :url="route('admin.recruiters.show', $referrer)">
+        Review recruiter
+    </x-mail::button>
 </x-mail::message>

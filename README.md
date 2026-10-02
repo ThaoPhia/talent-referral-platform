@@ -99,6 +99,8 @@ npm run docker:rebuild
 
 This script (`docker/rebuild.ps1`) builds the image, stops/removes any existing container, and starts a fresh one using the local `.env` file (`--env-file .env`).
 
+It also starts Mailpit on the same Docker network. For local email testing, set `MAIL_MAILER=smtp`, `MAIL_HOST=mailpit`, and `MAIL_PORT=1025` in `.env`. View captured messages at [http://localhost:8025](http://localhost:8025); set `MAILPIT_PORT` in `.env` to change the host-side inbox port. Mailpit is for local development and does not deliver email to external inboxes.
+
 The image name, container name, volume name, and port are all read from `.env`, with fallback defaults if unset:
 
 ```dotenv
@@ -112,22 +114,22 @@ Notes on how it works:
 
 ## Project requirements
     Tables: 
-        users(type: admin, normal/referrer)
-            referrer (name, email, resume URL, note)
+        users(type: admin, recruiter, normal)
+            normal candidate (name, email, resume URL, note)
         jobs(title, description, location, post, date, status(active, archived))
         referrals (date, user_id, referrer_id, job_id, status(pending, accepted, rejected))
     Usages:
         Backend: Admin create/edit/view jobs; Admin view/edit referrals 
         Front-end: 
             Guest/member search/view jobs; 
-            Only member can click on "Refer a candidate" button when viewing a job listing
+            Only recruiter can click on "Refer a candidate" button when viewing a job listing
 
 ## TODOs
-- Add need for confirmation for referrer sign-up. Admin need to approved first. Otherwise, account is not active yet.
-- Implement referral accept/reject email and endpoints
-- Change to use policy for admin restrictions
-- On referrer sent, add email to be send and view job with accept or denied... 
-    - then maybe in the future add application (Internal/external)
-    - User doesn't need to logged in, it just need a token to acknowledge it's that person
-- Dashboard for normal user to view referral history
-
+- [x] Add need for confirmation for recruiter sign-up. Admin need to approved first. Otherwise, account is not active yet.
+- [x] Implement referral accept/reject email and endpoints
+- [ ] Change to use policy for admin restrictions
+- [x] On referrer sent, add email to be send and view job with accept or denied... 
+- [ ] Referred user view job. User doesn't need to logged in, it just need a token to acknowledge it's that person
+    - [ ] Does viewing the job auto change the referrer status to accept?
+- [ ] Dashboard for recruiter user to view referral history
+- [ ] Maybe in the future add application (Internal/external)

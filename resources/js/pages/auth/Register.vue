@@ -31,12 +31,12 @@ onMounted(() => {
 
 <template>
     <GuestAuthLayout
-        title="Become a referrer"
-        description="Create a referrer account to recommend candidates for open roles."
+        title="Become a recruiter"
+        description="Create a recruiter account to recommend candidates for open roles."
     >
         <template #title>
             <div class="text-center">
-                Become a referrer
+                Become a recruiter
             </div>
         </template>
 

@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'referrals' => Referral::query()
-                ->with(['user', 'referrer', 'job'])
+                ->with(['recruiter', 'candidate', 'job'])
                 ->where('user_id', $request->user()?->id)
                 ->latest()
                 ->get(),

@@ -9,12 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['user_id', 'referrer_id', 'job_id', 'status'])]
 class Referral extends Model
 {
-    public function user(): BelongsTo
+    public function recruiter(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function referrer(): BelongsTo
+    public function candidate(): BelongsTo
     {
         return $this->belongsTo(User::class, 'referrer_id');
     }

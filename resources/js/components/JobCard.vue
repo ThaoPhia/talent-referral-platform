@@ -17,7 +17,7 @@ const toast = useToast()
 const jobDialogOpen = ref(false)
 const referralDialogOpen = ref(false)
 const loginDialogOpen = ref(false)
-const memberOnlyDialogOpen = ref(false)
+const recruiterOnlyDialogOpen = ref(false)
 
 // Computed property for capitalized location
 const location = computed(() => props.job.location.charAt(0).toUpperCase() + props.job.location.slice(1))
@@ -90,8 +90,8 @@ const openReferralForm = () => {
         return
     }
 
-    if (page.props.auth.user.type !== 'referrer') {
-        memberOnlyDialogOpen.value = true
+    if (page.props.auth.user.type !== 'recruiter') {
+        recruiterOnlyDialogOpen.value = true
         return
     }
 
@@ -309,20 +309,19 @@ const closeReferralDialog = () => {
         </template>
     </Dialog>
     
-    <!-- Member Only Dialog -->
     <Dialog
-        v-model:visible="memberOnlyDialogOpen"
+        v-model:visible="recruiterOnlyDialogOpen"
         modal
-        header="Referrer access required"
+        header="Recruiter access required"
         class="w-full max-w-md"
     >
         <p class="m-0 text-muted-color">
-            Only referrer accounts can submit candidate referrals.
+            Only recruiter accounts can submit candidate referrals.
         </p>
         <template #footer>
             <Button
                 label="Close"
-                @click="memberOnlyDialogOpen = false"
+                @click="recruiterOnlyDialogOpen = false"
             />
         </template>
     </Dialog>

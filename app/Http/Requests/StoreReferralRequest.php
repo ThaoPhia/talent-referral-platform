@@ -9,7 +9,7 @@ class StoreReferralRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() instanceof User && $this->user()->isReferrer();
+        return $this->user() instanceof User && $this->user()->isRecruiter();
     }
 
     public function rules(): array

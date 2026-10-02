@@ -32,7 +32,7 @@ class FortifyServiceProvider extends ServiceProvider
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                return redirect()->route('login')->with('status', 'Your referrer application is pending review. We will email you when it is approved.');
+                return redirect()->route('login')->with('status', 'Your recruiter application is pending review. We will email you when it is approved.');
             }
         });
 

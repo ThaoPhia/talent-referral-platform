@@ -2,9 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue'
 import ReferralList from '@/components/ReferralList.vue'
 import AdminBreadcrumbs from '@/components/admin/AdminBreadcrumbs.vue'
+import type { Referral } from '@/types'
 
 const props = defineProps<{
-    referrals: Array<Record<string, unknown>>
+    referrals: Referral[]
 }>()
 </script>
 

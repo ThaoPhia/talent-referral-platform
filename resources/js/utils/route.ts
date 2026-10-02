@@ -31,15 +31,15 @@ hash: string | number,
 welcome: never,
 dashboard: never,
 'admin.dashboard': never,
-'admin.referrers.index': never,
-'admin.referrers.show': {
-referrer: string | number,
+'admin.recruiters.index': never,
+'admin.recruiters.show': {
+recruiter: string | number,
 },
-'admin.referrers.approve': {
-referrer: string | number,
+'admin.recruiters.approve': {
+recruiter: string | number,
 },
-'admin.referrers.deny': {
-referrer: string | number,
+'admin.recruiters.deny': {
+recruiter: string | number,
 },
 'admin.jobs.index': never,
 'admin.jobs.create': never,
@@ -107,10 +107,10 @@ const routes = {
     "welcome": "/",
     "dashboard": "dashboard",
     "admin.dashboard": "admin/dashboard",
-    "admin.referrers.index": "admin/referrers",
-    "admin.referrers.show": "admin/referrers/{referrer}",
-    "admin.referrers.approve": "admin/referrers/{referrer}/approve",
-    "admin.referrers.deny": "admin/referrers/{referrer}/deny",
+    "admin.recruiters.index": "admin/recruiters",
+    "admin.recruiters.show": "admin/recruiters/{recruiter}",
+    "admin.recruiters.approve": "admin/recruiters/{recruiter}/approve",
+    "admin.recruiters.deny": "admin/recruiters/{recruiter}/deny",
     "admin.jobs.index": "admin/jobs",
     "admin.jobs.create": "admin/jobs/create",
     "admin.jobs.store": "admin/jobs",

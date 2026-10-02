@@ -5,22 +5,22 @@ import AdminBreadcrumbs from '@/components/admin/AdminBreadcrumbs.vue'
 import { route } from '@/utils/route'
 
 defineProps<{
-    referrers: Array<{ id: number, name: string, email: string, created_at: string }>,
+    recruiters: Array<{ id: number, name: string, email: string, created_at: string }>,
 }>()
 </script>
 
 <template>
     <AppLayout
-        title="Referrer applications"
-        description="Review new referrer accounts."
+        title="Recruiter applications"
+        description="Review new recruiter accounts."
     >
-        <AdminBreadcrumbs :items="[{ label: 'Referrer applications' }]" />
+        <AdminBreadcrumbs :items="[{ label: 'Recruiter applications' }]" />
         <h1 class="text-xl font-semibold">
-            Pending referrers
+            Pending recruiters
         </h1>
         <DataTable
-            v-if="referrers.length"
-            :value="referrers"
+            v-if="recruiters.length"
+            :value="recruiters"
             stripedRows
         >
             <Column
@@ -35,7 +35,7 @@ defineProps<{
                 <template #body="{ data }">
                     <Button
                         :as="InertiaLink"
-                        :href="route('admin.referrers.show', { referrer: data.id })"
+                        :href="route('admin.recruiters.show', { recruiter: data.id })"
                         label="Review"
                         severity="secondary"
                         text
@@ -47,7 +47,7 @@ defineProps<{
             v-else
             severity="secondary"
         >
-            No pending referrer applications.
+            No pending recruiter applications.
         </Message>
     </AppLayout>
 </template>

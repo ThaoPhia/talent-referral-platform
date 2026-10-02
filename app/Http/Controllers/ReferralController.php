@@ -22,7 +22,7 @@ class ReferralController extends Controller
 
         return Inertia::render('Admin/Referrals', [
             'referrals' => Referral::query()
-                ->with(['user', 'referrer', 'job'])
+                ->with(['recruiter', 'candidate', 'job'])
                 ->latest()
                 ->get(),
         ]);

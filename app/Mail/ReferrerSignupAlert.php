@@ -17,7 +17,7 @@ class ReferrerSignupAlert extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'New referrer application');
+        return new Envelope(subject: 'New recruiter application');
     }
 
     public function content(): Content

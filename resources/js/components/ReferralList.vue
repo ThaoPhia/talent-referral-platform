@@ -5,24 +5,7 @@ import { Pencil } from '@lucide/vue'
 import InputErrors from '@/components/InputErrors.vue'
 import { useToast } from 'primevue/usetoast'
 import { route } from '@/utils/route'
-
-interface Referral {
-    id: number
-    status: 'pending' | 'accepted' | 'rejected'
-    user: {
-        name: string
-        email: string
-    }
-    referrer: {
-        name: string
-        email: string
-        resume_url: string | null
-        note: string | null
-    }
-    job: {
-        title: string
-    }
-}
+import type { Referral } from '@/types'
 
 const props = defineProps<{
     referrals: Referral[],
@@ -76,16 +59,16 @@ const updateReferral = () => {
         <Column header="Candidate">
             <template #body="{ data }">
                 <div class="flex flex-col">
-                    <span class="font-medium">{{ data.referrer.name }}</span>
-                    <span class="text-sm text-muted-color">{{ data.referrer.email }}</span>
+                    <span class="font-medium">{{ data.candidate.name }}</span>
+                    <span class="text-sm text-muted-color">{{ data.candidate.email }}</span>
                 </div>
             </template>
         </Column>
         <Column header="Referred by">
             <template #body="{ data }">
                 <div class="flex flex-col">
-                    <span>{{ data.user.name }}</span>
-                    <span class="text-sm text-muted-color">{{ data.user.email }}</span>
+                    <span>{{ data.recruiter.name }}</span>
+                    <span class="text-sm text-muted-color">{{ data.recruiter.email }}</span>
                 </div>
             </template>
         </Column>

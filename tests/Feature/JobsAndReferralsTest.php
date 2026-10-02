@@ -96,7 +96,7 @@ class JobsAndReferralsTest extends TestCase
     public function test_member_can_create_a_referral(): void
     {
         $member = User::factory()->create();
-        $member->forceFill(['type' => 'referrer'])->save();
+        $member->forceFill(['type' => 'recruiter'])->save();
         $candidate = User::factory()->create();
         $job = Job::create([
             'title' => 'Senior Engineer',
@@ -115,11 +115,14 @@ class JobsAndReferralsTest extends TestCase
 
         $response->assertRedirect();
         $this->assertDatabaseHas('referrals', [
-            'user_id' => $candidate->id,
-            'referrer_id' => $member->id,
+            'user_id' => $member->id,
+            'referrer_id' => $candidate->id,
             'job_id' => $job->id,
             'status' => 'pending',
         ]);
+        $referral = Referral::query()->firstOrFail();
+        $this->assertTrue($referral->recruiter->is($member));
+        $this->assertTrue($referral->candidate->is($candidate));
     }
 
     public function test_new_referral_candidate_is_created_as_normal_user(): void
@@ -140,7 +143,7 @@ class JobsAndReferralsTest extends TestCase
             'job_id' => $job->id,
         ])->assertRedirect();
 
-        $this->assertSame('referrer', $referrer->fresh()->type);
+        $this->assertSame('recruiter', $referrer->fresh()->type);
         $this->assertDatabaseHas('users', [
             'email' => 'candidate@example.com',
             'type' => 'normal',
