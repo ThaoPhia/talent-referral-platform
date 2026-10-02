@@ -7,10 +7,15 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminRecruiterController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\ReferredJobController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomeController::class)->name('welcome');
+Route::get('/referred-jobs/{user}/{referral}', [ReferredJobController::class, 'show'])
+    ->middleware('signed')->name('referred-jobs.show');
+Route::post('/referred-jobs/{user}/{referral}', [ReferredJobController::class, 'accept'])
+    ->middleware('signed')->name('referred-jobs.accept');
 
 // Fortify handled post requests for login, registration, password reset, etc.
 Route::get('/login', LoginController::class)->name('login');

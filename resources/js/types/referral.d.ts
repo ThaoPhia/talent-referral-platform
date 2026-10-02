@@ -1,6 +1,6 @@
 export interface Referral {
     id: number
-    status: 'pending' | 'accepted' | 'rejected'
+    status: 'pending' | 'viewed' | 'accepted' | 'rejected'
     recruiter: {
         name: string
         email: string

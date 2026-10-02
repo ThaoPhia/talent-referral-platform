@@ -6,6 +6,7 @@ use App\Http\Requests\StoreReferralRequest;
 use App\Http\Requests\UpdateReferralRequest;
 use App\Models\Referral;
 use App\Models\User;
+use App\Notifications\CandidateJobReferral;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +34,7 @@ class ReferralController extends Controller
     {
         $user = $request->user();
 
-        DB::transaction(function () use ($request, $user): void {
+        [$candidate, $referral] = DB::transaction(function () use ($request, $user): array {
             $candidate = User::firstOrNew([
                 'email' => $request->string('candidate_email')->toString(),
             ]);
@@ -49,13 +50,17 @@ class ReferralController extends Controller
                 'note' => $request->string('note')->toString(),
             ])->save();
 
-            Referral::create([
+            $referral = Referral::create([
                 'user_id' => $user->id, // Referred by this user
                 'referrer_id' => $candidate->id, // The referred candidate
                 'job_id' => $request->integer('job_id'),
                 'status' => 'pending',
             ]);
+
+            return [$candidate, $referral];
         });
+
+        $candidate->notify(new CandidateJobReferral($referral->load('job')));
 
         return back()->with('success', 'Referral created successfully.');
     }

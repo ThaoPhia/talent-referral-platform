@@ -117,7 +117,7 @@ Notes on how it works:
         users(type: admin, recruiter, normal)
             normal candidate (name, email, resume URL, note)
         jobs(title, description, location, post, date, status(active, archived))
-        referrals (date, user_id, referrer_id, job_id, status(pending, accepted, rejected))
+        referrals (date, user_id, referrer_id, job_id, status(pending, viewed, accepted, rejected))
     Usages:
         Backend: Admin create/edit/view jobs; Admin view/edit referrals 
         Front-end: 
@@ -127,9 +127,10 @@ Notes on how it works:
 ## TODOs
 - [x] Add need for confirmation for recruiter sign-up. Admin need to approved first. Otherwise, account is not active yet.
 - [x] Implement referral accept/reject email and endpoints
-- [ ] Change to use policy for admin restrictions
+- [x] Change to use policy for admin restrictions
 - [x] On referrer sent, add email to be send and view job with accept or denied... 
 - [ ] Referred user view job. User doesn't need to logged in, it just need a token to acknowledge it's that person
-    - [ ] Does viewing the job auto change the referrer status to accept?
+    - [ ] Does viewing the job auto change the referrer status to accept? Let's change it to viewed? Then when the user clicked applied it will be changed to accepted?
+- [ ] Add seeders to populate data and trigger this to be run once     
 - [ ] Dashboard for recruiter user to view referral history
-- [ ] Maybe in the future add application (Internal/external)
+- [ ] Maybe in the future add application (Internal & external)

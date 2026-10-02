@@ -5,7 +5,11 @@ namespace Tests\Feature;
 use App\Models\Job;
 use App\Models\Referral;
 use App\Models\User;
+use App\Notifications\CandidateJobReferral;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class JobsAndReferralsTest extends TestCase
@@ -134,6 +138,8 @@ class JobsAndReferralsTest extends TestCase
         $admin = User::factory()->create();
         $admin->forceFill(['type' => 'admin'])->save();
         $this->actingAs($admin)->get(route('admin.referrals.index'))->assertOk();
+        $this->patch(route('admin.referrals.update', $referral), ['status' => 'viewed'])->assertRedirect();
+        $this->assertSame('viewed', $referral->fresh()->status);
         $this->patch(route('admin.referrals.update', $referral), ['status' => 'accepted'])->assertRedirect();
         $this->assertSame('accepted', $referral->fresh()->status);
     }
@@ -172,6 +178,7 @@ class JobsAndReferralsTest extends TestCase
 
     public function test_new_referral_candidate_is_created_as_normal_user(): void
     {
+        Notification::fake();
         $referrer = User::factory()->create();
         $job = Job::create([
             'title' => 'Senior Engineer',
@@ -193,6 +200,72 @@ class JobsAndReferralsTest extends TestCase
             'email' => 'candidate@example.com',
             'type' => 'normal',
         ]);
+        $candidate = User::where('email', 'candidate@example.com')->firstOrFail();
+        $referral = Referral::where('job_id', $job->id)->firstOrFail();
+        Notification::assertSentTo($candidate, CandidateJobReferral::class);
+        $link = Notification::sent($candidate, CandidateJobReferral::class)->first()->toMail($candidate)->actionUrl;
+        $this->assertStringContainsString("/{$candidate->id}/{$referral->id}", $link);
+
+        Auth::logout();
+        $this->get($link)->assertInertia(fn($page) => $page
+            ->component('ReferredJob')
+            ->where('accepted', false)
+            ->where('job.description', $job->description));
+        $this->assertSame('viewed', $referral->fresh()->status);
+        $this->get($link)->assertOk();
+        $this->assertSame('viewed', $referral->fresh()->status);
+
+        $this->post($link)->assertRedirect($link);
+        $this->assertSame('accepted', $referral->fresh()->status);
+        $this->get($link)->assertInertia(fn($page) => $page
+            ->component('ReferredJob')
+            ->where('accepted', true)
+            ->where('job.description', $job->description));
+    }
+
+    public function test_referred_job_link_rejects_tampering_expiry_and_wrong_candidate(): void
+    {
+        $recruiter = User::factory()->create();
+        $candidate = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $job = Job::create([
+            'title' => 'Senior Engineer',
+            'description' => 'Build great things.',
+            'location' => 'Remote',
+            'post_on' => now()->subDay(),
+        ]);
+        $referral = Referral::create([
+            'user_id' => $recruiter->id,
+            'referrer_id' => $candidate->id,
+            'job_id' => $job->id,
+            'status' => 'pending',
+        ]);
+
+        $url = URL::temporarySignedRoute('referred-jobs.show', now()->addDays(7), [
+            'user' => $candidate->id,
+            'referral' => $referral->id,
+        ]);
+        $this->post($url)->assertForbidden();
+        $this->get(str_replace("/{$candidate->id}/", "/{$otherUser->id}/", $url))->assertForbidden();
+        $this->post(route('referred-jobs.accept', [$candidate, $referral]))->assertForbidden();
+
+        $wrongCandidateUrl = URL::temporarySignedRoute('referred-jobs.show', now()->addDays(7), [
+            'user' => $otherUser->id,
+            'referral' => $referral->id,
+        ]);
+        $this->get($wrongCandidateUrl)->assertNotFound();
+
+        $expiredUrl = URL::temporarySignedRoute('referred-jobs.show', now()->subMinute(), [
+            'user' => $candidate->id,
+            'referral' => $referral->id,
+        ]);
+        $this->get($expiredUrl)->assertForbidden();
+        $this->assertSame('pending', $referral->fresh()->status);
+
+        $referral->update(['status' => 'rejected']);
+        $this->get($url)->assertForbidden();
+        $this->post($url)->assertForbidden();
+        $this->assertSame('rejected', $referral->fresh()->status);
     }
 
     public function test_normal_user_cannot_create_a_referral(): void

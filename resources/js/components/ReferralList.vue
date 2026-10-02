@@ -105,7 +105,7 @@ const updateReferral = () => {
                 <label for="referral-status">Status</label>
                 <Select
                     v-model="editForm.status"
-                    :options="['pending', 'accepted', 'rejected']"
+                    :options="['pending', 'viewed', 'accepted', 'rejected']"
                     inputId="referral-status"
                     :invalid="Boolean(editForm.errors.status)"
                     fluid

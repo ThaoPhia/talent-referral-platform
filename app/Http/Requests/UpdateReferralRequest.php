@@ -19,7 +19,7 @@ class UpdateReferralRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::in(['pending', 'accepted', 'rejected'])],
+            'status' => ['required', Rule::in(['pending', 'viewed', 'accepted', 'rejected'])],
         ];
     }
 }
