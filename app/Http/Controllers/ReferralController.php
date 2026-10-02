@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,7 +19,7 @@ class ReferralController extends Controller
 {
     public function index(Request $request): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        Gate::authorize('viewAny', Referral::class);
 
         return Inertia::render('Admin/Referrals', [
             'referrals' => Referral::query()

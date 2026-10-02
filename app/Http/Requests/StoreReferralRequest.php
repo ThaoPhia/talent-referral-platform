@@ -2,14 +2,15 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
+use App\Models\Referral;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 
 class StoreReferralRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() instanceof User && $this->user()->isRecruiter();
+        return Gate::allows('create', Referral::class);
     }
 
     public function rules(): array

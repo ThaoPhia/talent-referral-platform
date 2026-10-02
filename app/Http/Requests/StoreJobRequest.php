@@ -2,15 +2,16 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
+use App\Models\Job;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class StoreJobRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() instanceof User && $this->user()->isAdmin();
+        return Gate::allows('create', Job::class);
     }
 
     public function rules(): array

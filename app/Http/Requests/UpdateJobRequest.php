@@ -2,15 +2,18 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
+use App\Models\Job;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class UpdateJobRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() instanceof User && $this->user()->isAdmin();
+        $job = $this->route('job');
+
+        return $job instanceof Job && Gate::allows('update', $job);
     }
 
     public function rules(): array

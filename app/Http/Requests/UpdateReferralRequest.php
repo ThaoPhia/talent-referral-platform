@@ -2,15 +2,18 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
+use App\Models\Referral;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class UpdateReferralRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() instanceof User && $this->user()->isAdmin();
+        $referral = $this->route('referral');
+
+        return $referral instanceof Referral && Gate::allows('update', $referral);
     }
 
     public function rules(): array

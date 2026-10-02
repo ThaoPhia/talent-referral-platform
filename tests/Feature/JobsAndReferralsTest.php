@@ -73,6 +73,7 @@ class JobsAndReferralsTest extends TestCase
             'post_on' => '2026-09-24 09:00:00',
         ]);
 
+        $this->actingAs($admin)->get(route('admin.jobs.edit', $job))->assertOk();
         $response = $this->actingAs($admin)->patch(route('admin.jobs.update', $job), [
             'status' => 'archived',
         ]);
@@ -91,6 +92,50 @@ class JobsAndReferralsTest extends TestCase
         $this->actingAs($member)
             ->get(route('admin.jobs.index'))
             ->assertForbidden();
+    }
+
+    public function test_recruiter_cannot_create_edit_or_update_jobs(): void
+    {
+        $recruiter = User::factory()->create();
+        $job = Job::create([
+            'title' => 'Senior Engineer',
+            'description' => 'Build great things.',
+            'location' => 'Remote',
+            'post_on' => '2026-09-24 09:00:00',
+        ]);
+
+        $this->actingAs($recruiter)->get(route('admin.jobs.create'))->assertForbidden();
+        $this->get(route('admin.jobs.edit', $job))->assertForbidden();
+        $this->patch(route('admin.jobs.update', $job), ['status' => 'archived'])->assertForbidden();
+        $this->assertSame('active', $job->fresh()->status);
+    }
+
+    public function test_only_admin_can_list_and_update_referrals(): void
+    {
+        $recruiter = User::factory()->create();
+        $candidate = User::factory()->create();
+        $job = Job::create([
+            'title' => 'Senior Engineer',
+            'description' => 'Build great things.',
+            'location' => 'Remote',
+            'post_on' => '2026-09-24 09:00:00',
+        ]);
+        $referral = Referral::create([
+            'user_id' => $recruiter->id,
+            'referrer_id' => $candidate->id,
+            'job_id' => $job->id,
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($recruiter)->get(route('admin.referrals.index'))->assertForbidden();
+        $this->patch(route('admin.referrals.update', $referral), ['status' => 'accepted'])->assertForbidden();
+        $this->assertSame('pending', $referral->fresh()->status);
+
+        $admin = User::factory()->create();
+        $admin->forceFill(['type' => 'admin'])->save();
+        $this->actingAs($admin)->get(route('admin.referrals.index'))->assertOk();
+        $this->patch(route('admin.referrals.update', $referral), ['status' => 'accepted'])->assertRedirect();
+        $this->assertSame('accepted', $referral->fresh()->status);
     }
 
     public function test_member_can_create_a_referral(): void

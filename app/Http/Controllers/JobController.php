@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateJobRequest;
 use App\Models\Job;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,7 +15,7 @@ class JobController extends Controller
 {
     public function index(Request $request): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        Gate::authorize('viewAny', Job::class);
 
         return Inertia::render('Admin/Jobs', [
             'jobs' => Job::query()->latest('post_on')->get(),
@@ -23,7 +24,7 @@ class JobController extends Controller
 
     public function create(Request $request): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        Gate::authorize('create', Job::class);
 
         return Inertia::render('Admin/Jobs/Create');
     }
@@ -44,7 +45,7 @@ class JobController extends Controller
 
     public function edit(Request $request, Job $job): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        Gate::authorize('update', $job);
 
         return Inertia::render('Admin/Jobs/Edit', [
             'job' => $job,

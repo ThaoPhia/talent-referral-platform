@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Notifications\ReferrerApplicationDenied;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -13,7 +14,7 @@ class AdminRecruiterController extends Controller
 {
     public function index(Request $request): Response
     {
-        abort_unless($request->user()?->isAdmin() === true, 403);
+        Gate::authorize('viewAny', User::class);
 
         return Inertia::render('Admin/Recruiters', [
             'recruiters' => User::query()->where('type', 'recruiter')
@@ -23,7 +24,7 @@ class AdminRecruiterController extends Controller
 
     public function show(Request $request, User $recruiter): Response
     {
-        abort_unless($request->user()?->isAdmin() === true, 403);
+        Gate::authorize('view', $recruiter);
         abort_unless($recruiter->isRecruiter(), 404);
 
         return Inertia::render('Admin/Recruiter', [
@@ -33,7 +34,7 @@ class AdminRecruiterController extends Controller
 
     public function approve(Request $request, User $recruiter): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin() === true, 403);
+        Gate::authorize('approve', $recruiter);
         abort_unless($recruiter->isRecruiter() && $recruiter->status === 'pending', 409);
 
         $recruiter->forceFill(['status' => 'active'])->save();
@@ -43,7 +44,7 @@ class AdminRecruiterController extends Controller
 
     public function deny(Request $request, User $recruiter): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin() === true, 403);
+        Gate::authorize('deny', $recruiter);
         abort_unless($recruiter->isRecruiter() && $recruiter->status === 'pending', 409);
 
         $recruiter->forceFill(['status' => 'denied'])->save();
