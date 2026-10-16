@@ -44,7 +44,7 @@ RUN apt-get update \
     opcache \
     pdo_sqlite \
     zip \
-    && a2enmod rewrite \
+    && a2enmod rewrite ssl \
     && sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/*.conf \
     && sed -ri "s!/var/www/!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
     && rm -rf /var/lib/apt/lists/*
@@ -62,7 +62,7 @@ RUN rm -f bootstrap/cache/*.php \
 COPY docker/local/web/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-EXPOSE 80
+EXPOSE 80 443
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["apache2-foreground"]

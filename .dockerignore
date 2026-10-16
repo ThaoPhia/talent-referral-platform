@@ -1,4 +1,5 @@
 .git
+docker/certs
 .env
 .env.*
 !.env.example

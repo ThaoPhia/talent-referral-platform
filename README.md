@@ -97,18 +97,38 @@ The `Dockerfile` builds a self-contained production-style image (Vite assets + C
 npm run docker:rebuild
 ```
 
-This script (`docker/rebuild.ps1`) builds the image, stops/removes any existing container, and starts a fresh one using the local `.env` file (`--env-file .env`).
+On macOS, install and start Docker Desktop before running this command. The shell script (`docker/rebuild.sh`) works on macOS and Linux without PowerShell. It builds the image, stops/removes any existing container, and starts a fresh one using the local `.env` file (`--env-file .env`). If a Docker command fails, the script stops and reports the error.
 
 The image name, container name, volume name, and port are all read from `.env`, with fallback defaults if unset:
 
 ```dotenv
 APP_PORT=8000
-    DOCKER_CONTAINER_NAME=talent-referral-platform
-    DOCKER_IMAGE_NAME=talent-referral-platform:latest
-    DOCKER_VOLUME_NAME=talent-referral-platform-sqlite
+DOCKER_CONTAINER_NAME=talent-referral-platform
+DOCKER_IMAGE_NAME=talent-referral-platform:latest
+DOCKER_VOLUME_NAME=talent-referral-platform-sqlite
 ```
 
-Notes on how it works:
+The SQLite database volume is preserved when the container is replaced. The local `public/` directory is mounted into the container so Laravel can see Vite's live hot file and development fonts manifest.
+
+### Local HTTPS on macOS
+
+Install mkcert and trust its local certificate authority (macOS may request your password):
+
+```bash
+brew install mkcert
+mkcert -install
+```
+
+Map `talentreferralplateform.test` to `127.0.0.1` in `/etc/hosts`, then configure:
+
+```dotenv
+APP_PORT=8001
+APP_URL=https://talentreferralplateform.test:8001
+```
+
+Run `npm run docker:rebuild`. For HTTPS URLs, the rebuild script generates a local certificate and publishes Apache's HTTPS port on the port in `APP_URL` (443 if omitted). Certificates and private keys stay in the ignored `docker/certs/` directory, are excluded from image builds, and are mounted read-only. The rebuild honors `APP_URL` instead of replacing it with localhost.
+
+If Vite is running, restart `npm run dev` after generating the certificates. Vite uses the same certificates and the hostname from `APP_URL`, preventing mixed-content and WebSocket errors on HTTPS pages. Missing certificates cause Vite to fail explicitly; run the rebuild first. HTTP URLs keep the existing non-TLS workflow.
 
 ## Project requirements
     Tables: 
@@ -121,6 +141,4 @@ Notes on how it works:
         Front-end: 
             Guest/member search/view jobs; 
             Only member can click on "Refer a candidate" button when viewing a job listing
-
-
 

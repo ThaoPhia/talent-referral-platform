@@ -5,13 +5,21 @@ import vue from '@vitejs/plugin-vue'
 import tailwindcss from "@tailwindcss/vite"
 import Components from 'unplugin-vue-components/vite'
 import { PrimeVueResolver } from '@primevue/auto-import-resolver'
+import { readFileSync } from 'node:fs'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
     // https://vite.dev/config/#using-environment-variables-in-config
     const env = loadEnv(mode, process.cwd(), '')
     const devPort = env.VITE_APP_PORT ? Number(env.VITE_APP_PORT) : 5173
-    const hostDomain = env.VITE_HOST_DOMAIN || 'localhost'
+    const appUrl = new URL(env.APP_URL || 'http://localhost')
+    const hostDomain = env.VITE_HOST_DOMAIN || appUrl.hostname
+    const https = command === 'serve' && appUrl.protocol === 'https:'
+        ? {
+            cert: readFileSync('docker/certs/local.pem'),
+            key: readFileSync('docker/certs/local-key.pem'),
+        }
+        : undefined
 
     return {
         plugins: [
@@ -50,6 +58,8 @@ export default defineConfig(({ mode }) => {
         server: {
             port: devPort,
             host: true,
+            https,
+            allowedHosts: [hostDomain],
             hmr: {
                 host: hostDomain,
             },
