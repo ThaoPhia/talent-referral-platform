@@ -12,6 +12,20 @@ $ImageName = Get-EnvValue 'DOCKER_IMAGE_NAME' 'talent-referral-platform:latest'
 $ContainerName = Get-EnvValue 'DOCKER_CONTAINER_NAME' 'talent-referral-platform'
 $VolumeName = Get-EnvValue 'DOCKER_VOLUME_NAME' 'talent-referral-platform-sqlite'
 $Port = Get-EnvValue 'APP_PORT' '8000'
+$AppUrl = Get-EnvValue 'APP_URL' 'http://localhost'
+try {
+    $AppUri = [UriBuilder]::new($AppUrl)
+    if ($AppUri.Scheme -notin @('http', 'https')) {
+        throw 'APP_URL must use HTTP or HTTPS'
+    }
+    $AppUri.Port = [int]$Port
+    $AppUrl = $AppUri.Uri.GetLeftPart([UriPartial]::Authority)
+} catch {
+    throw "Invalid APP_URL or APP_PORT: $($_.Exception.Message)"
+}
+if ($AppUri.Scheme -eq 'https') {
+    throw 'HTTPS Docker rebuilds are supported by docker/rebuild.sh on macOS/Linux only.'
+}
 
 Write-Host "Building image $ImageName..."
 docker build -t $ImageName .
@@ -34,6 +48,6 @@ docker volume create $VolumeName | Out-Null
 Write-Host "Starting container from new image..."
 # Mount public/ so Laravel sees Vite's live hot file and dev fonts manifest.
 $PublicPath = Join-Path $PWD 'public'
-docker run -d --name $ContainerName -p "${Port}:80" --env-file .env -e "APP_URL=http://localhost:$Port" -v "${VolumeName}:/var/www/data" -v "${PublicPath}:/var/www/html/public" $ImageName
+docker run -d --name $ContainerName -p "${Port}:80" --env-file .env -e "APP_URL=$AppUrl" -v "${VolumeName}:/var/www/data" -v "${PublicPath}:/var/www/html/public" $ImageName
 
-Write-Host "Done. App is available at http://localhost:$Port"
+Write-Host "Done. App is available at $AppUrl"

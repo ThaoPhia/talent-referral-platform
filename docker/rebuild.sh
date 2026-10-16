@@ -36,10 +36,11 @@ image_name=$(get_env_value DOCKER_IMAGE_NAME talent-referral-platform:latest)
 container_name=$(get_env_value DOCKER_CONTAINER_NAME talent-referral-platform)
 volume_name=$(get_env_value DOCKER_VOLUME_NAME talent-referral-platform-sqlite)
 port=$(get_env_value APP_PORT 8000)
-app_url=$(get_env_value APP_URL "http://localhost:${port}")
+app_url=$(get_env_value APP_URL http://localhost)
 app_url=$(node --input-type=module -e '
-    const url = new URL(process.argv[1].replaceAll("${APP_PORT}", process.argv[2]))
+    const url = new URL(process.argv[1])
     if (!["http:", "https:"].includes(url.protocol)) throw new Error("APP_URL must use HTTP or HTTPS")
+    url.port = process.argv[2]
     console.log(url.origin)
 ' "$app_url" "$port")
 
@@ -51,12 +52,11 @@ case "$app_url" in
             exit 1
         fi
         hostname=$(node -e 'console.log(new URL(process.argv[1]).hostname)' "$app_url")
-        https_port=$(node -e 'console.log(new URL(process.argv[1]).port || "443")' "$app_url")
         mkdir -p docker/certs
         mkcert -cert-file docker/certs/local.pem -key-file docker/certs/local-key.pem \
             "$hostname" localhost 127.0.0.1 ::1
         chmod 600 docker/certs/local-key.pem
-        set -- -p "${https_port}:443" \
+        set -- -p "${port}:443" \
             -v "$(pwd)/docker/certs:/etc/apache2/local-certs:ro" \
             -v "$(pwd)/docker/local/web/https.conf:/etc/apache2/conf-enabled/local-https.conf:ro"
         ;;

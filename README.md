@@ -123,10 +123,10 @@ Map `talentreferralplateform.test` to `127.0.0.1` in `/etc/hosts`, then configur
 
 ```dotenv
 APP_PORT=8001
-APP_URL=https://talentreferralplateform.test:8001
+APP_URL=https://talentreferralplateform.test
 ```
 
-Run `npm run docker:rebuild`. For HTTPS URLs, the rebuild script generates a local certificate and publishes Apache's HTTPS port on the port in `APP_URL` (443 if omitted). Certificates and private keys stay in the ignored `docker/certs/` directory, are excluded from image builds, and are mounted read-only. The rebuild honors `APP_URL` instead of replacing it with localhost.
+Run `npm run docker:rebuild`. `APP_PORT` controls the host port published by Docker and is added to the runtime `APP_URL` when it is nonstandard; for HTTPS, the script publishes that host port to Apache's HTTPS port. Certificates and private keys stay in the ignored `docker/certs/` directory, are excluded from image builds, and are mounted read-only. Set `APP_URL` to the protocol and hostname only; the rebuild preserves those while adding the configured port as needed.
 
 If Vite is running, restart `npm run dev` after generating the certificates. Vite uses the same certificates and the hostname from `APP_URL`, preventing mixed-content and WebSocket errors on HTTPS pages. Missing certificates cause Vite to fail explicitly; run the rebuild first. HTTP URLs keep the existing non-TLS workflow.
 
@@ -141,4 +141,3 @@ If Vite is running, restart `npm run dev` after generating the certificates. Vit
         Front-end: 
             Guest/member search/view jobs; 
             Only member can click on "Refer a candidate" button when viewing a job listing
-
