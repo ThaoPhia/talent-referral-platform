@@ -120,7 +120,7 @@ const sampleReferrals = [
                 >
                     <div class="text-center lg:text-left">
                         <Tag
-                            v-animateonscroll.once="{ enterClass: heroHeadingEnterClass, threshold: [0.1] }"
+                            :class="heroHeadingEnterClass"
                             severity="secondary"
                             rounded
                             class="px-3 py-1"
@@ -131,7 +131,7 @@ const sampleReferrals = [
 
                         <h1
                             id="welcome-heading"
-                            v-animateonscroll.once="{ enterClass: heroHeadingEnterClass, threshold: [0.1] }"
+                            :class="heroHeadingEnterClass"
                             class="mt-6 text-4xl font-semibold tracking-tight text-balance text-surface-950 sm:text-5xl lg:text-6xl dark:text-white"
                         >
                             Hire through the people
@@ -139,7 +139,7 @@ const sampleReferrals = [
                         </h1>
 
                         <p
-                            v-animateonscroll.once="{ enterClass: heroCopyEnterClass, threshold: [0.1] }"
+                            :class="heroCopyEnterClass"
                             class="mx-auto mt-6 max-w-xl text-base leading-8 text-surface-600 sm:text-lg lg:mx-0 dark:text-surface-300"
                         >
                             Talent Referral Platform connects open roles with candidates recommended by your network,
@@ -147,7 +147,7 @@ const sampleReferrals = [
                         </p>
 
                         <div
-                            v-animateonscroll.once="{ enterClass: heroActionsEnterClass, threshold: [0.1] }"
+                            :class="heroActionsEnterClass"
                             class="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
                         >
                             <Button
@@ -177,7 +177,7 @@ const sampleReferrals = [
                         </div>
 
                         <ul
-                            v-animateonscroll.once="{ enterClass: heroActionsEnterClass, threshold: [0.1] }"
+                            :class="heroActionsEnterClass"
                             class="mx-auto mt-10 flex max-w-md flex-col gap-3 text-left text-sm text-surface-600 lg:mx-0 dark:text-surface-300"
                         >
                             <li
@@ -193,7 +193,7 @@ const sampleReferrals = [
 
                     <!-- Hero illustration -->
                     <div
-                        v-animateonscroll.once="{ enterClass: heroVisualEnterClass, threshold: [0.1] }"
+                        :class="heroVisualEnterClass"
                         aria-hidden="true"
                         class="relative mx-auto w-full max-w-lg"
                     >
