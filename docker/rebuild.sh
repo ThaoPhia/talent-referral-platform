@@ -35,6 +35,7 @@ get_env_value() {
 image_name=$(get_env_value DOCKER_IMAGE_NAME talent-referral-platform:latest)
 container_name=$(get_env_value DOCKER_CONTAINER_NAME talent-referral-platform)
 volume_name=$(get_env_value DOCKER_VOLUME_NAME talent-referral-platform-sqlite)
+app_env=$(get_env_value APP_ENV production)
 port=$(get_env_value APP_PORT 8000)
 app_url=$(get_env_value APP_URL http://localhost)
 app_url=$(node --input-type=module -e '
@@ -63,7 +64,7 @@ case "$app_url" in
 esac
 
 printf 'Building image %s...\n' "$image_name"
-docker build -t "$image_name" .
+docker build --build-arg "APP_ENV=${app_env}" -t "$image_name" .
 
 existing_container=$(docker ps -aq -f "name=^${container_name}$")
 if [ -n "$existing_container" ]; then

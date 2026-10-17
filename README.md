@@ -110,6 +110,19 @@ DOCKER_VOLUME_NAME=talent-referral-platform-sqlite
 
 The SQLite database volume is preserved when the container is replaced. The local `public/` directory is mounted into the container so Laravel can see Vite's live hot file and development fonts manifest.
 
+Local rebuilds (`APP_ENV=local`) include Composer development dependencies, including Faker for sample data. Other environments and direct Docker builds omit development dependencies by default.
+
+To populate the Docker database with sample jobs, users, and referrals, rebuild after seeder changes, then run:
+
+```bash
+npm run docker:rebuild
+docker exec talent-referral-platform php artisan db:seed
+```
+
+Replace the container name if you customized `DOCKER_CONTAINER_NAME`. Run Artisan inside Docker when `DB_DATABASE` points to `/var/www/data/database.sqlite`; that path belongs to the container, not the host. For a host-based setup with its own database, use `php artisan db:seed` instead.
+
+The sample-data seeder runs only when `APP_ENV=local` and can be rerun safely. It creates 25 sample jobs, 25 sample users, 15 referrals, and a local admin account (`sample.admin@example.test`, password `password`). Sample user accounts also use the password `password`.
+
 ### Local HTTPS on macOS
 
 Install mkcert and trust its local certificate authority (macOS may request your password):

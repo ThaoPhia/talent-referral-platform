@@ -11,6 +11,7 @@ function Get-EnvValue($name, $default) {
 $ImageName = Get-EnvValue 'DOCKER_IMAGE_NAME' 'talent-referral-platform:latest'
 $ContainerName = Get-EnvValue 'DOCKER_CONTAINER_NAME' 'talent-referral-platform'
 $VolumeName = Get-EnvValue 'DOCKER_VOLUME_NAME' 'talent-referral-platform-sqlite'
+$AppEnv = Get-EnvValue 'APP_ENV' 'production'
 $Port = Get-EnvValue 'APP_PORT' '8000'
 $AppUrl = Get-EnvValue 'APP_URL' 'http://localhost'
 try {
@@ -28,7 +29,7 @@ if ($AppUri.Scheme -eq 'https') {
 }
 
 Write-Host "Building image $ImageName..."
-docker build -t $ImageName .
+docker build --build-arg "APP_ENV=$AppEnv" -t $ImageName .
 if ($LASTEXITCODE -ne 0) {
     throw "Docker image build failed."
 }

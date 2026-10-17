@@ -14,9 +14,11 @@ FROM composer:2 AS dependencies
 
 WORKDIR /app
 
+ARG APP_ENV=production
+
 COPY composer.json composer.lock ./
-RUN composer install \
-    --no-dev \
+RUN if [ "$APP_ENV" = "local" ]; then set --; else set -- --no-dev; fi \
+    && composer install "$@" \
     --no-interaction \
     --no-progress \
     --no-scripts \
