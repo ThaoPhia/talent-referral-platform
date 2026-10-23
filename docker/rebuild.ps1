@@ -11,6 +11,7 @@ function Get-EnvValue($name, $default) {
 $ImageName = Get-EnvValue 'DOCKER_IMAGE_NAME' 'talent-referral-platform:latest'
 $ContainerName = Get-EnvValue 'DOCKER_CONTAINER_NAME' 'talent-referral-platform'
 $VolumeName = Get-EnvValue 'DOCKER_VOLUME_NAME' 'talent-referral-platform-sqlite'
+$DataDir = Get-EnvValue 'DOCKER_DATA_DIR' ''
 $AppEnv = Get-EnvValue 'APP_ENV' 'production'
 $Port = Get-EnvValue 'APP_PORT' '8000'
 $AppUrl = Get-EnvValue 'APP_URL' 'http://localhost'
@@ -43,12 +44,21 @@ if ($ExistingContainer) {
     docker rm $ContainerName | Out-Null
 }
 
-Write-Host "Ensuring database volume exists..."
-docker volume create $VolumeName | Out-Null
+# Use a host folder for the SQLite data when DOCKER_DATA_DIR is set, so tools
+# like DBeaver can open the database directly. Otherwise use a named volume.
+if ($DataDir) {
+    Write-Host "Using database folder $DataDir..."
+    New-Item -ItemType Directory -Force -Path $DataDir | Out-Null
+    $DataMount = $DataDir
+} else {
+    Write-Host "Ensuring database volume exists..."
+    docker volume create $VolumeName | Out-Null
+    $DataMount = $VolumeName
+}
 
 Write-Host "Starting container from new image..."
 # Mount public/ so Laravel sees Vite's live hot file and dev fonts manifest.
 $PublicPath = Join-Path $PWD 'public'
-docker run -d --name $ContainerName -p "${Port}:80" --env-file .env -e "APP_URL=$AppUrl" -v "${VolumeName}:/var/www/data" -v "${PublicPath}:/var/www/html/public" $ImageName
+docker run -d --name $ContainerName -p "${Port}:80" --env-file .env -e "APP_URL=$AppUrl" -v "${DataMount}:/var/www/data" -v "${PublicPath}:/var/www/html/public" $ImageName
 
 Write-Host "Done. App is available at $AppUrl"

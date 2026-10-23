@@ -108,7 +108,7 @@ DOCKER_IMAGE_NAME=talent-referral-platform:latest
 DOCKER_VOLUME_NAME=talent-referral-platform-sqlite
 ```
 
-The SQLite database volume is preserved when the container is replaced. The local `public/` directory is mounted into the container so Laravel can see Vite's live hot file and development fonts manifest.
+The SQLite database volume is preserved when the container is replaced. To keep the database in a folder on your computer instead (for example, to open it in DBeaver), set `DOCKER_DATA_DIR` to that folder's path in `.env`. The rebuild scripts create the folder if needed and mount it in place of the volume. The local `public/` directory is mounted into the container so Laravel can see Vite's live hot file and development fonts manifest.
 
 Local rebuilds (`APP_ENV=local`) include Composer development dependencies, including Faker for sample data. Other environments and direct Docker builds omit development dependencies by default.
 
@@ -140,6 +140,16 @@ APP_URL=https://talentreferralplateform.test
 ```
 
 Run `npm run docker:rebuild`. `APP_PORT` controls the host port published by Docker and is added to the runtime `APP_URL` when it is nonstandard; for HTTPS, the script publishes that host port to Apache's HTTPS port. Certificates and private keys stay in the ignored `docker/certs/` directory, are excluded from image builds, and are mounted read-only. Set `APP_URL` to the protocol and hostname only; the rebuild preserves those while adding the configured port as needed.
+
+When sharing port-free HTTPS domains with PhiaPropertyRental, set
+`DOCKER_PROXY_NETWORK=local-https` and
+`APP_URL=https://talentreferralplateform.test`. Create the `local-https` network
+first (PhiaPropertyRental's `docker:restart` also creates it). In this mode the
+rebuild script joins that network without publishing a host port, and leaves
+`APP_URL` port-free; `APP_PORT` is ignored. The shared TLS passthrough proxy in
+PhiaPropertyRental's `docker/proxy/compose.yaml` owns host port 443 and routes
+each hostname to its own container. HTTPS certificates remain managed here
+with mkcert. Stopping the PhiaPropertyRental app does not stop the shared proxy.
 
 If Vite is running, restart `npm run dev` after generating the certificates. Vite uses the same certificates and the hostname from `APP_URL`, preventing mixed-content and WebSocket errors on HTTPS pages. Missing certificates cause Vite to fail explicitly; run the rebuild first. HTTP URLs keep the existing non-TLS workflow.
 
