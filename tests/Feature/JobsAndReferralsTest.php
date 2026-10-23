@@ -115,8 +115,8 @@ class JobsAndReferralsTest extends TestCase
 
         $response->assertRedirect();
         $this->assertDatabaseHas('referrals', [
-            'user_id' => $candidate->id,
-            'referrer_id' => $member->id,
+            'user_id' => $member->id,
+            'referrer_id' => $candidate->id,
             'job_id' => $job->id,
             'status' => 'pending',
         ]);
