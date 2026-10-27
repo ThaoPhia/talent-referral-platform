@@ -1,6 +1,6 @@
 # Talent Referral Platform
 
-A referral-driven recruiting platform where members recommend candidates for open roles and recruiters manage the resulting referrals.
+A referral-driven recruiting platform where referrers recommend candidates for open roles and recruiters manage the resulting referrals.
 
 This project is more of a starter kit than a complete, production-ready application. It provides the foundation and core flows to build on, not a fully working product.
 
@@ -155,12 +155,12 @@ If Vite is running, restart `npm run dev` after generating the certificates. Vit
 
 ## Project requirements
     Tables: 
-        users(type: admin, normal/referrer)
-            referrer (name, email, resume URL, note)
+        users(type: admin, referrer, candidate)
+            candidate (name, email, resume URL, note)
         jobs(title, description, location, post, date, status(active, archived))
-        referrals (date, user_id, referrer_id, job_id, status(pending, accepted, rejected))
+        referrals (date, user_id, candidate_id, job_id, status(pending, accepted, rejected))
     Usages:
         Backend: Admin create/edit/view jobs; Admin view/edit referrals 
         Front-end: 
-            Guest/member search/view jobs; 
-            Only member can click on "Refer a candidate" button when viewing a job listing
+            Guest/referrer search/view jobs;
+            Only referrers can click on "Refer a candidate" button when viewing a job listing

@@ -31,11 +31,11 @@ class JobsAndReferralsTest extends TestCase
         ]);
     }
 
-    public function test_member_cannot_create_a_job(): void
+    public function test_referrer_cannot_create_a_job(): void
     {
-        $member = User::factory()->create();
+        $referrer = User::factory()->create();
 
-        $response = $this->actingAs($member)->post(route('admin.jobs.store'), [
+        $response = $this->actingAs($referrer)->post(route('admin.jobs.store'), [
             'title' => 'Senior Engineer',
             'description' => 'Build great things.',
             'location' => 'Remote',
@@ -84,20 +84,21 @@ class JobsAndReferralsTest extends TestCase
         ]);
     }
 
-    public function test_member_cannot_list_jobs_from_the_admin_endpoint(): void
+    public function test_referrer_cannot_list_jobs_from_the_admin_endpoint(): void
     {
-        $member = User::factory()->create();
+        $referrer = User::factory()->create();
 
-        $this->actingAs($member)
+        $this->actingAs($referrer)
             ->get(route('admin.jobs.index'))
             ->assertForbidden();
     }
 
-    public function test_member_can_create_a_referral(): void
+    public function test_referrer_can_create_a_referral(): void
     {
-        $member = User::factory()->create();
-        $member->forceFill(['type' => 'referrer'])->save();
+        $referrer = User::factory()->create();
+        $referrer->forceFill(['type' => 'referrer'])->save();
         $candidate = User::factory()->create();
+        $candidate->forceFill(['type' => 'candidate'])->save();
         $job = Job::create([
             'title' => 'Senior Engineer',
             'description' => 'Build great things.',
@@ -105,7 +106,7 @@ class JobsAndReferralsTest extends TestCase
             'post_on' => '2026-09-24 09:00:00',
         ]);
 
-        $response = $this->actingAs($member)->post(route('referrals.store'), [
+        $response = $this->actingAs($referrer)->post(route('referrals.store'), [
             'candidate_name' => $candidate->name,
             'candidate_email' => $candidate->email,
             'resume_url' => 'https://example.com/resume.pdf',
@@ -115,14 +116,14 @@ class JobsAndReferralsTest extends TestCase
 
         $response->assertRedirect();
         $this->assertDatabaseHas('referrals', [
-            'user_id' => $member->id,
-            'referrer_id' => $candidate->id,
+            'user_id' => $referrer->id,
+            'candidate_id' => $candidate->id,
             'job_id' => $job->id,
             'status' => 'pending',
         ]);
     }
 
-    public function test_new_referral_candidate_is_created_as_normal_user(): void
+    public function test_new_referral_candidate_is_created_with_candidate_type(): void
     {
         $referrer = User::factory()->create();
         $job = Job::create([
@@ -143,14 +144,26 @@ class JobsAndReferralsTest extends TestCase
         $this->assertSame('referrer', $referrer->fresh()->type);
         $this->assertDatabaseHas('users', [
             'email' => 'candidate@example.com',
-            'type' => 'normal',
+            'type' => 'candidate',
         ]);
+
+        $this->assertDatabaseHas('referrals', [
+            'user_id' => $referrer->id,
+            'candidate_id' => User::query()->where('email', 'candidate@example.com')->value('id'),
+        ]);
+
+        $referral = Referral::query()->with(['referrer', 'candidate'])->firstOrFail();
+        $this->assertSame($referrer->id, $referral->referrer->id);
+        $this->assertSame(
+            User::query()->where('email', 'candidate@example.com')->value('id'),
+            $referral->candidate->id,
+        );
     }
 
-    public function test_normal_user_cannot_create_a_referral(): void
+    public function test_candidate_cannot_create_a_referral(): void
     {
         $candidate = User::factory()->create();
-        $candidate->forceFill(['type' => 'normal'])->save();
+        $candidate->forceFill(['type' => 'candidate'])->save();
         $job = Job::create([
             'title' => 'Senior Engineer',
             'description' => 'Build great things.',

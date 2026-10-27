@@ -30,7 +30,7 @@ const heroActionsEnterClass = 'welcome-animate-enter-soft animate-duration-1250 
 const heroVisualEnterClass = 'welcome-animate-enter-soft-up animate-duration-1250 [animation-delay:400ms] animate-fill-backwards'
 
 const highlights = [
-    'Members refer candidates they trust',
+    'Referrers recommend candidates they trust',
     'Recruiters review every referral in one place',
     'Track each referral from pending to accepted',
 ]

@@ -22,7 +22,7 @@ class ReferralController extends Controller
 
         return Inertia::render('Admin/Referrals', [
             'referrals' => Referral::query()
-                ->with(['user', 'referrer', 'job'])
+                ->with(['referrer', 'candidate', 'job'])
                 ->latest()
                 ->get(),
         ]);
@@ -39,7 +39,7 @@ class ReferralController extends Controller
 
             if (! $candidate->exists) {
                 $candidate->password = Hash::make(Str::random(40));
-                $candidate->type = 'normal';
+                $candidate->type = 'candidate';
             }
 
             $candidate->forceFill([
@@ -49,8 +49,8 @@ class ReferralController extends Controller
             ])->save();
 
             Referral::create([
-                'user_id' => $user->id, // Referred by this user
-                'referrer_id' => $candidate->id, // The referred candidate
+                'user_id' => $user->id,
+                'candidate_id' => $candidate->id,
                 'job_id' => $request->integer('job_id'),
                 'status' => 'pending',
             ]);

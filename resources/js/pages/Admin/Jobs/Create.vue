@@ -21,7 +21,7 @@ const breadcrumbs = [
                 Add job
             </template>
             <template #subtitle>
-                Create a job listing for members to discover.
+                Create a job listing for referrers to discover.
             </template>
             <template #content>
                 <JobForm />

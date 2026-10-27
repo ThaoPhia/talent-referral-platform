@@ -40,7 +40,7 @@ class LocalSampleDataSeeder extends Seeder
             ->map(fn (int $index): User => $this->saveSampleUser(
                 $faker->name(),
                 sprintf('sample.candidate.%02d@example.test', $index),
-                'normal',
+                'candidate',
                 $index + 15,
             ));
 
@@ -65,7 +65,7 @@ class LocalSampleDataSeeder extends Seeder
             Referral::query()->updateOrCreate(
                 [
                     'user_id' => $referrers[$index]->id,
-                    'referrer_id' => $candidates[$index % $candidates->count()]->id,
+                    'candidate_id' => $candidates[$index % $candidates->count()]->id,
                     'job_id' => $jobs[$index]->id,
                 ],
                 ['status' => $statuses[$index % count($statuses)]],
@@ -81,8 +81,8 @@ class LocalSampleDataSeeder extends Seeder
             'password' => 'password',
             'email_verified_at' => now(),
             'type' => $type,
-            'resume_url' => $type === 'normal' ? "https://example.test/resumes/candidate-{$index}.pdf" : null,
-            'note' => $type === 'normal' ? 'Experienced candidate interested in collaborative teams.' : null,
+            'resume_url' => $type === 'candidate' ? "https://example.test/resumes/candidate-{$index}.pdf" : null,
+            'note' => $type === 'candidate' ? 'Experienced candidate interested in collaborative teams.' : null,
         ])->save();
 
         return $user;

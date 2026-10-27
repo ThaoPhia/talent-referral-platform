@@ -17,7 +17,7 @@ const toast = useToast()
 const jobDialogOpen = ref(false)
 const referralDialogOpen = ref(false)
 const loginDialogOpen = ref(false)
-const memberOnlyDialogOpen = ref(false)
+const referrerOnlyDialogOpen = ref(false)
 
 // Computed property for capitalized location
 const location = computed(() => props.job.location.charAt(0).toUpperCase() + props.job.location.slice(1))
@@ -91,7 +91,7 @@ const openReferralForm = () => {
     }
 
     if (page.props.auth.user.type !== 'referrer') {
-        memberOnlyDialogOpen.value = true
+        referrerOnlyDialogOpen.value = true
         return
     }
 
@@ -309,9 +309,9 @@ const closeReferralDialog = () => {
         </template>
     </Dialog>
     
-    <!-- Member Only Dialog -->
+    <!-- Referrer Only Dialog -->
     <Dialog
-        v-model:visible="memberOnlyDialogOpen"
+        v-model:visible="referrerOnlyDialogOpen"
         modal
         header="Referrer access required"
         class="w-full max-w-md"
@@ -322,7 +322,7 @@ const closeReferralDialog = () => {
         <template #footer>
             <Button
                 label="Close"
-                @click="memberOnlyDialogOpen = false"
+                @click="referrerOnlyDialogOpen = false"
             />
         </template>
     </Dialog>

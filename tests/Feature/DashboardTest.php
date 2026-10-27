@@ -20,22 +20,22 @@ class DashboardTest extends TestCase
             ->assertRedirect(route('admin.dashboard'));
     }
 
-    public function test_members_can_access_the_member_dashboard(): void
+    public function test_referrers_can_access_the_referrer_dashboard(): void
     {
-        $member = User::factory()->create();
-        $member->forceFill(['type' => 'referrer'])->save();
+        $referrer = User::factory()->create();
+        $referrer->forceFill(['type' => 'referrer'])->save();
 
-        $this->actingAs($member)
+        $this->actingAs($referrer)
             ->get(route('dashboard'))
             ->assertOk();
     }
 
-    public function test_members_cannot_access_the_admin_dashboard(): void
+    public function test_referrers_cannot_access_the_admin_dashboard(): void
     {
-        $member = User::factory()->create();
-        $member->forceFill(['type' => 'referrer'])->save();
+        $referrer = User::factory()->create();
+        $referrer->forceFill(['type' => 'referrer'])->save();
 
-        $this->actingAs($member)
+        $this->actingAs($referrer)
             ->get(route('admin.dashboard'))
             ->assertForbidden();
     }
