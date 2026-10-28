@@ -11,7 +11,7 @@ const props = defineProps<{
         title: string,
         location: string,
         post_on: string,
-        closed_date: string,
+        closed_on: string,
         status: 'draft' | 'active' | 'archived',
     }>,
 }>()
@@ -64,7 +64,7 @@ const props = defineProps<{
                             header="Posted"
                         />
                         <Column
-                            field="closed_date"
+                            field="closed_on"
                             header="Closes"
                         />
                         <Column

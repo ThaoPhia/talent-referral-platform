@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 use Throwable;
 
-class ClosedDateWithinRange implements ValidationRule
+class ClosedOnWithinRange implements ValidationRule
 {
     public function __construct(private readonly mixed $postOn)
     {
@@ -32,18 +32,18 @@ class ClosedDateWithinRange implements ValidationRule
 
         try {
             $postOn = Carbon::parse($this->postOn)->startOfDay();
-            $closedDate = Carbon::parse($value)->startOfDay();
+            $closedOn = Carbon::parse($value)->startOfDay();
         } catch (Throwable) {
             return null;
         }
 
-        if ($closedDate->lt($postOn)) {
+        if ($closedOn->lt($postOn)) {
             return 'The close date must be on or after the post date.';
         }
 
         $maxDate = $postOn->copy()->addMonthsNoOverflow(Job::MAX_OPEN_MONTHS);
 
-        if ($closedDate->gt($maxDate)) {
+        if ($closedOn->gt($maxDate)) {
             return sprintf(
                 'The close date must be no more than %d months after the post date (%s).',
                 Job::MAX_OPEN_MONTHS,

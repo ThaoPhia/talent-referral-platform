@@ -17,7 +17,7 @@ class WelcomeJobsTest extends TestCase
             'description' => 'This job is visible.',
             'location' => 'Remote',
             'post_on' => now()->subDay(),
-            'closed_date' => now()->addMonth()->toDateString(),
+            'closed_on' => now()->addMonth()->toDateString(),
         ]);
 
         Job::create([
@@ -25,7 +25,7 @@ class WelcomeJobsTest extends TestCase
             'description' => 'This job is not visible yet.',
             'location' => 'Remote',
             'post_on' => now()->addDay(),
-            'closed_date' => now()->addMonth()->toDateString(),
+            'closed_on' => now()->addMonth()->toDateString(),
         ]);
 
         Job::create([
@@ -33,7 +33,7 @@ class WelcomeJobsTest extends TestCase
             'description' => 'This job is no longer visible.',
             'location' => 'Remote',
             'post_on' => now()->subDay(),
-            'closed_date' => now()->addMonth()->toDateString(),
+            'closed_on' => now()->addMonth()->toDateString(),
             'status' => 'archived',
         ]);
 
@@ -52,7 +52,7 @@ class WelcomeJobsTest extends TestCase
                 'description' => 'Visible job.',
                 'location' => 'Remote',
                 'post_on' => now()->subDays($i),
-                'closed_date' => now()->addMonth()->toDateString(),
+                'closed_on' => now()->addMonth()->toDateString(),
             ]);
         }
 
@@ -81,7 +81,7 @@ class WelcomeJobsTest extends TestCase
             'description' => 'Build things.',
             'location' => 'Remote',
             'post_on' => now()->subDay(),
-            'closed_date' => now()->addMonth()->toDateString(),
+            'closed_on' => now()->addMonth()->toDateString(),
         ]);
 
         Job::create([
@@ -89,7 +89,7 @@ class WelcomeJobsTest extends TestCase
             'description' => 'Design things.',
             'location' => 'Austin',
             'post_on' => now()->subDay(),
-            'closed_date' => now()->addMonth()->toDateString(),
+            'closed_on' => now()->addMonth()->toDateString(),
         ]);
 
         $this->get(route('welcome', ['search' => 'laravel']))
@@ -106,7 +106,7 @@ class WelcomeJobsTest extends TestCase
             'description' => 'Design things.',
             'location' => 'Austin',
             'post_on' => now()->subDay(),
-            'closed_date' => now()->addMonth()->toDateString(),
+            'closed_on' => now()->addMonth()->toDateString(),
         ]);
 
         $this->get(route('welcome', ['search' => '%']))

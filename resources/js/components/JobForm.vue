@@ -14,7 +14,7 @@ interface Job {
     description: string
     location: string
     post_on: string
-    closed_date: string
+    closed_on: string
     status: JobStatus
 }
 
@@ -42,13 +42,13 @@ const form = useForm({
     description: props.job?.description ?? '',
     location: props.job?.location ?? '',
     post_on: formatDateTimeLocal(props.job?.post_on),
-    closed_date: formatDate(props.job?.closed_date),
+    closed_on: formatDate(props.job?.closed_on),
     status: props.job?.status ?? 'active' as JobStatus,
 })
 
-const minClosedDate = computed(() => formatDate(form.post_on) || undefined)
-const maxClosedDate = computed(() => minClosedDate.value
-    ? addMonthsNoOverflow(minClosedDate.value, MAX_OPEN_MONTHS)
+const minClosedOn = computed(() => formatDate(form.post_on) || undefined)
+const maxClosedDate = computed(() => minClosedOn.value
+    ? addMonthsNoOverflow(minClosedOn.value, MAX_OPEN_MONTHS)
     : undefined)
 
 const isEditing = Boolean(props.job?.id)
@@ -131,16 +131,16 @@ const submit = () => {
                 <label for="job-closed-date">Close date</label>
                 <InputText
                     id="job-closed-date"
-                    v-model="form.closed_date"
-                    :invalid="Boolean(form.errors.closed_date)"
-                    :min="minClosedDate"
+                    v-model="form.closed_on"
+                    :invalid="Boolean(form.errors.closed_on)"
+                    :min="minClosedOn"
                     :max="maxClosedDate"
                     type="date"
                     required
                     fluid
                 />
                 <small class="text-muted-color">Up to {{ MAX_OPEN_MONTHS }} months after the post date.</small>
-                <InputErrors :errors="form.errors.closed_date" />
+                <InputErrors :errors="form.errors.closed_on" />
             </div>
 
             <div class="flex flex-col gap-2">

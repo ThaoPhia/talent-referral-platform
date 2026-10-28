@@ -59,7 +59,7 @@ class LocalSampleDataSeeder extends Seeder
                         'description' => "Join our team as a {$title} and help build thoughtful, reliable products. Collaborate across disciplines, share your expertise, and make a measurable impact.",
                         'location' => $faker->randomElement(['Remote', 'New York, NY', 'San Francisco, CA', 'Austin, TX', 'Toronto, ON']),
                         'post_on' => now()->subDays(25 - $index)->setTime(9, 0),
-                        'closed_date' => now()->subDays(25 - $index)->addMonthsNoOverflow(3)->toDateString(),
+                        'closed_on' => now()->subDays(25 - $index)->addMonthsNoOverflow(3)->toDateString(),
                         'status' => $index > 22 ? 'archived' : 'active',
                     ],
                 );

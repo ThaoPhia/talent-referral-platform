@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Job;
 use App\Models\User;
-use App\Rules\ClosedDateWithinRange;
+use App\Rules\ClosedOnWithinRange;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,7 +26,7 @@ class StoreJobRequest extends FormRequest
             'description' => ['required', 'string'],
             'location' => ['required', 'string', 'max:255'],
             'post_on' => ['required', 'date'],
-            'closed_date' => ['required', 'date', new ClosedDateWithinRange($this->input('post_on'))],
+            'closed_on' => ['required', 'date', new ClosedOnWithinRange($this->input('post_on'))],
             'status' => ['sometimes', Rule::in(Job::STATUSES)],
         ];
     }
@@ -35,7 +35,7 @@ class StoreJobRequest extends FormRequest
     {
         return [
             'post_on' => 'post date',
-            'closed_date' => 'close date',
+            'closed_on' => 'close date',
         ];
     }
 }

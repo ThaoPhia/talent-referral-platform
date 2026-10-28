@@ -5,12 +5,21 @@ namespace Tests\Feature;
 use App\Models\Job;
 use App\Models\Referral;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class JobsAndReferralsTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config(['app.schedule_timezone' => 'America/Chicago']);
+        $this->travelTo(CarbonImmutable::parse('2026-10-28 12:00:00', 'America/Chicago'));
+    }
 
     public function test_admin_can_create_a_job(): void
     {
@@ -22,7 +31,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
-            'closed_date' => '2026-12-24',
+            'closed_on' => '2026-12-24',
         ]);
 
         $response->assertRedirect();
@@ -41,7 +50,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
-            'closed_date' => '2026-12-24',
+            'closed_on' => '2026-12-24',
         ]);
 
         $response->assertForbidden();
@@ -57,7 +66,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
-            'closed_date' => '2026-12-24',
+            'closed_on' => '2026-12-24',
         ]);
 
         $this->actingAs($admin)
@@ -74,7 +83,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
-            'closed_date' => '2026-12-24',
+            'closed_on' => '2026-12-24',
         ]);
 
         $response = $this->actingAs($admin)->patch(route('admin.jobs.update', $job), [
@@ -108,7 +117,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
-            'closed_date' => '2026-12-24',
+            'closed_on' => '2026-12-24',
         ]);
 
         $response = $this->actingAs($referrer)->post(route('referrals.store'), [
@@ -136,7 +145,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
-            'closed_date' => '2026-12-24',
+            'closed_on' => '2026-12-24',
         ]);
 
         $this->actingAs($referrer)->post(route('referrals.store'), [
@@ -175,7 +184,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
-            'closed_date' => '2026-12-24',
+            'closed_on' => '2026-12-24',
         ]);
 
         $this->actingAs($candidate)->post(route('referrals.store'), [
@@ -197,7 +206,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
-            'closed_date' => '2026-12-24',
+            'closed_on' => '2026-12-24',
         ]);
 
         $response = $this->actingAs($admin)->post(route('referrals.store'), [
@@ -207,5 +216,43 @@ class JobsAndReferralsTest extends TestCase
 
         $response->assertForbidden();
         $this->assertDatabaseCount('referrals', 0);
+    }
+
+    public function test_referrer_can_only_refer_to_published_open_jobs(): void
+    {
+        $referrer = User::factory()->create();
+        $referrer->forceFill(['type' => 'referrer'])->save();
+        $job = fn (array $attributes) => Job::create(array_merge([
+            'title' => 'Senior Engineer',
+            'description' => 'Unpublished details.',
+            'location' => 'Remote',
+            'post_on' => '2026-10-01 09:00:00',
+            'closed_on' => '2026-12-24',
+        ], $attributes));
+        $refer = fn (Job $job) => $this->actingAs($referrer)->post(route('referrals.store'), [
+            'candidate_name' => 'Jane Candidate',
+            'candidate_email' => 'jane@example.com',
+            'resume_url' => 'https://example.com/resume.pdf',
+            'note' => 'Strong candidate.',
+            'job_id' => $job->id,
+        ]);
+
+        $unavailable = [
+            $job(['status' => 'draft']),
+            $job(['status' => 'archived']),
+            $job(['post_on' => '2026-11-01 09:00:00', 'closed_on' => '2027-01-24']),
+            $job(['closed_on' => '2026-10-27']),
+        ];
+
+        foreach ($unavailable as $unavailableJob) {
+            $refer($unavailableJob)->assertSessionHasErrors('job_id');
+        }
+
+        $this->assertDatabaseCount('referrals', 0);
+
+        $closesToday = $job(['closed_on' => '2026-10-28']);
+        $refer($closesToday)->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('referrals', ['job_id' => $closesToday->id]);
     }
 }

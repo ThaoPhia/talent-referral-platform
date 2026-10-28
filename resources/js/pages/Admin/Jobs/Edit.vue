@@ -10,7 +10,7 @@ interface Job {
     description: string
     location: string
     post_on: string
-    closed_date: string
+    closed_on: string
     status: 'draft' | 'active' | 'archived'
 }
 

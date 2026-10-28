@@ -15,7 +15,7 @@ class ArchiveExpiredJobs extends Command
     {
         $count = Job::query()
             ->where('status', 'active')
-            ->whereDate('closed_date', '<=', today(config('app.schedule_timezone'))->toDateString())
+            ->whereDate('closed_on', '<=', today(config('app.schedule_timezone'))->toDateString())
             ->update(['status' => 'archived']);
 
         $this->info("Archived {$count} expired job(s).");

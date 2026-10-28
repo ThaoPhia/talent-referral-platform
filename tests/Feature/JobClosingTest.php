@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Job;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -27,7 +28,7 @@ class JobClosingTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-11-30 09:00:00',
-            'closed_date' => '2027-02-28',
+            'closed_on' => '2027-02-28',
         ], $overrides);
     }
 
@@ -40,15 +41,15 @@ class JobClosingTest extends TestCase
         $this->assertDatabaseHas('jobs', [
             'title' => 'Senior Engineer',
             'status' => 'draft',
-            'closed_date' => '2027-02-28',
+            'closed_on' => '2027-02-28',
         ]);
     }
 
     public function test_close_date_is_required(): void
     {
         $this->actingAs($this->admin())
-            ->post(route('admin.jobs.store'), $this->jobPayload(['closed_date' => null]))
-            ->assertSessionHasErrors('closed_date');
+            ->post(route('admin.jobs.store'), $this->jobPayload(['closed_on' => null]))
+            ->assertSessionHasErrors('closed_on');
 
         $this->assertDatabaseCount('jobs', 0);
     }
@@ -56,15 +57,15 @@ class JobClosingTest extends TestCase
     public function test_close_date_cannot_be_before_post_date(): void
     {
         $this->actingAs($this->admin())
-            ->post(route('admin.jobs.store'), $this->jobPayload(['closed_date' => '2026-11-29']))
-            ->assertSessionHasErrors('closed_date');
+            ->post(route('admin.jobs.store'), $this->jobPayload(['closed_on' => '2026-11-29']))
+            ->assertSessionHasErrors('closed_on');
     }
 
     public function test_close_date_cannot_be_more_than_three_months_after_post_date(): void
     {
         $this->actingAs($this->admin())
-            ->post(route('admin.jobs.store'), $this->jobPayload(['closed_date' => '2027-03-01']))
-            ->assertSessionHasErrors('closed_date');
+            ->post(route('admin.jobs.store'), $this->jobPayload(['closed_on' => '2027-03-01']))
+            ->assertSessionHasErrors('closed_on');
     }
 
     public function test_malformed_post_date_returns_validation_error_instead_of_server_error(): void
@@ -82,27 +83,28 @@ class JobClosingTest extends TestCase
 
         $this->actingAs($this->admin())
             ->patch(route('admin.jobs.update', $job), ['post_on' => '2026-11-15 09:00:00'])
-            ->assertSessionHasErrors('closed_date');
+            ->assertSessionHasErrors('closed_on');
 
         $this->actingAs($this->admin())
-            ->patch(route('admin.jobs.update', $job), ['closed_date' => '2027-03-01'])
-            ->assertSessionHasErrors('closed_date');
+            ->patch(route('admin.jobs.update', $job), ['closed_on' => '2027-03-01'])
+            ->assertSessionHasErrors('closed_on');
 
         $this->actingAs($this->admin())
-            ->patch(route('admin.jobs.update', $job), ['closed_date' => '2027-01-15'])
+            ->patch(route('admin.jobs.update', $job), ['closed_on' => '2027-01-15'])
             ->assertSessionHasNoErrors();
 
-        $this->assertSame('2027-01-15', $job->fresh()->closed_date->toDateString());
+        $this->assertSame('2027-01-15', $job->fresh()->closed_on->toDateString());
     }
 
     public function test_archive_command_only_archives_expired_active_jobs(): void
     {
-        $this->travelTo('2027-01-15 23:59:00');
+        config(['app.schedule_timezone' => 'America/Chicago']);
+        $this->travelTo(CarbonImmutable::parse('2027-01-15 23:59:00', 'America/Chicago'));
 
-        $expired = Job::create($this->jobPayload(['title' => 'Expired', 'closed_date' => '2027-01-14']));
-        $closingToday = Job::create($this->jobPayload(['title' => 'Closing today', 'closed_date' => '2027-01-15']));
-        $open = Job::create($this->jobPayload(['title' => 'Open', 'closed_date' => '2027-01-16']));
-        $expiredDraft = Job::create($this->jobPayload(['title' => 'Draft', 'closed_date' => '2027-01-14', 'status' => 'draft']));
+        $expired = Job::create($this->jobPayload(['title' => 'Expired', 'closed_on' => '2027-01-14']));
+        $closingToday = Job::create($this->jobPayload(['title' => 'Closing today', 'closed_on' => '2027-01-15']));
+        $open = Job::create($this->jobPayload(['title' => 'Open', 'closed_on' => '2027-01-16']));
+        $expiredDraft = Job::create($this->jobPayload(['title' => 'Draft', 'closed_on' => '2027-01-14', 'status' => 'draft']));
 
         $this->artisan('jobs:archive-expired')->assertSuccessful();
 
@@ -125,10 +127,10 @@ class JobClosingTest extends TestCase
     public function test_archive_command_uses_schedule_timezone_for_today(): void
     {
         config(['app.schedule_timezone' => 'America/Chicago']);
-        $this->travelTo(now('UTC')->setDate(2027, 1, 15)->setTime(4, 59));
+        $this->travelTo(CarbonImmutable::parse('2027-01-15 04:59:00', 'UTC'));
 
-        $closesTodayInChicago = Job::create($this->jobPayload(['title' => 'Chicago today', 'post_on' => '2026-12-01 09:00:00', 'closed_date' => '2027-01-14']));
-        $closesTodayInUtc = Job::create($this->jobPayload(['title' => 'UTC today', 'post_on' => '2026-12-01 09:00:00', 'closed_date' => '2027-01-15']));
+        $closesTodayInChicago = Job::create($this->jobPayload(['title' => 'Chicago today', 'post_on' => '2026-12-01 09:00:00', 'closed_on' => '2027-01-14']));
+        $closesTodayInUtc = Job::create($this->jobPayload(['title' => 'UTC today', 'post_on' => '2026-12-01 09:00:00', 'closed_on' => '2027-01-15']));
 
         $this->artisan('jobs:archive-expired')->assertSuccessful();
 

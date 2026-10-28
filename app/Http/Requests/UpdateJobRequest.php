@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Job;
 use App\Models\User;
-use App\Rules\ClosedDateWithinRange;
+use App\Rules\ClosedOnWithinRange;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -27,7 +27,7 @@ class UpdateJobRequest extends FormRequest
             'description' => ['sometimes', 'required', 'string'],
             'location' => ['sometimes', 'required', 'string', 'max:255'],
             'post_on' => ['sometimes', 'required', 'date'],
-            'closed_date' => ['sometimes', 'required', 'date'],
+            'closed_on' => ['sometimes', 'required', 'date'],
             'status' => ['sometimes', Rule::in(Job::STATUSES)],
         ];
     }
@@ -36,7 +36,7 @@ class UpdateJobRequest extends FormRequest
     {
         return [
             'post_on' => 'post date',
-            'closed_date' => 'close date',
+            'closed_on' => 'close date',
         ];
     }
 
@@ -47,18 +47,18 @@ class UpdateJobRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
-                if (! $this->hasAny(['post_on', 'closed_date']) || $validator->errors()->hasAny(['post_on', 'closed_date'])) {
+                if (! $this->hasAny(['post_on', 'closed_on']) || $validator->errors()->hasAny(['post_on', 'closed_on'])) {
                     return;
                 }
 
                 /** @var Job $job */
                 $job = $this->route('job');
 
-                $message = (new ClosedDateWithinRange($this->input('post_on', $job->post_on)))
-                    ->errorFor($this->input('closed_date', $job->closed_date));
+                $message = (new ClosedOnWithinRange($this->input('post_on', $job->post_on)))
+                    ->errorFor($this->input('closed_on', $job->closed_on));
 
                 if ($message !== null) {
-                    $validator->errors()->add('closed_date', $message);
+                    $validator->errors()->add('closed_on', $message);
                 }
             },
         ];
