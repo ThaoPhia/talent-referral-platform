@@ -23,8 +23,9 @@ class WelcomeController extends Controller
         return Inertia::render('Welcome', [
             'search' => $search,
             'jobs' => Job::query()
-                ->where('status', 'active')
+                ->where('status', Job::STATUSES[1])
                 ->where('post_on', '<=', now())
+                ->whereDate('closed_on', '>=', today(config('app.schedule_timezone'))->toDateString())
                 ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                     ->whereRaw("lower(title) like lower(?) escape '!'", [$searchTerm])
                     ->orWhereRaw("lower(description) like lower(?) escape '!'", [$searchTerm])
