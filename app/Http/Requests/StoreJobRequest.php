@@ -26,7 +26,7 @@ class StoreJobRequest extends FormRequest
             'description' => ['required', 'string'],
             'location' => ['required', 'string', 'max:255'],
             'post_on' => ['required', 'date'],
-            'closed_on' => ['required', 'date', new ClosedOnWithinRange($this->input('post_on'))],
+            'closed_on' => ['required', 'date', 'date_format:Y-m-d', new ClosedOnWithinRange($this->input('post_on'))],
             'status' => ['sometimes', Rule::in(Job::STATUSES)],
         ];
     }
