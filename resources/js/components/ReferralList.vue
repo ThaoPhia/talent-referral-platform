@@ -55,7 +55,10 @@ const updateReferral = () => {
 </script>
 
 <template>
-    <DataTable :value="props.referrals" stripedRows>
+    <DataTable
+        :value="props.referrals"
+        stripedRows
+    >
         <Column header="Candidate">
             <template #body="{ data }">
                 <div class="flex flex-col">
@@ -72,9 +75,18 @@ const updateReferral = () => {
                 </div>
             </template>
         </Column>
-        <Column field="job.title" header="Job" />
-        <Column field="status" header="Status" />
-        <Column v-if="props.canEdit" header="Actions">
+        <Column
+            field="job.title"
+            header="Job"
+        />
+        <Column
+            field="status"
+            header="Status"
+        />
+        <Column
+            v-if="props.canEdit"
+            header="Actions"
+        >
             <template #body="{ data }">
                 <Button
                     v-tooltip.top="'Edit referral'"

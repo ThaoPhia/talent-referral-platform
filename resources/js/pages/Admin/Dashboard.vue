@@ -31,7 +31,10 @@ import { route } from '@/utils/route'
                             :href="route('admin.referrals.index')"
                             class="inline-flex"
                         >
-                            <Button label="View referrals" severity="secondary" />
+                            <Button
+                                label="View referrals"
+                                severity="secondary"
+                            />
                         </InertiaLink>
                     </div>
                 </div>

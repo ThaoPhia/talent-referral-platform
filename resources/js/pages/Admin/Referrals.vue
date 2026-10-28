@@ -19,8 +19,12 @@ const props = defineProps<{
             <template #content>
                 <div class="flex flex-col gap-4">
                     <div>
-                        <h1 class="text-xl font-semibold">Referrals</h1>
-                        <p class="m-0 text-muted-color">Review candidate referrals and update their status.</p>
+                        <h1 class="text-xl font-semibold">
+                            Referrals
+                        </h1>
+                        <p class="m-0 text-muted-color">
+                            Review candidate referrals and update their status.
+                        </p>
                     </div>
                     <ReferralList
                         :referrals="props.referrals"

@@ -28,8 +28,12 @@ const props = defineProps<{
                 <div class="flex flex-col gap-4">
                     <div class="flex items-center justify-between gap-4">
                         <div>
-                            <h1 class="text-xl font-semibold">Job listings</h1>
-                            <p class="m-0 text-muted-color">Create, update, and archive jobs.</p>
+                            <h1 class="text-xl font-semibold">
+                                Job listings
+                            </h1>
+                            <p class="m-0 text-muted-color">
+                                Create, update, and archive jobs.
+                            </p>
                         </div>
                         <Button
                             :as="InertiaLink"
@@ -42,12 +46,31 @@ const props = defineProps<{
                         </Button>
                     </div>
 
-                    <DataTable v-if="props.jobs.length" :value="props.jobs" stripedRows>
-                        <Column field="title" header="Title" />
-                        <Column field="location" header="Location" />
-                        <Column field="post_on" header="Posted" />
-                        <Column field="closed_date" header="Closes" />
-                        <Column field="status" header="Status" />
+                    <DataTable
+                        v-if="props.jobs.length"
+                        :value="props.jobs"
+                        stripedRows
+                    >
+                        <Column
+                            field="title"
+                            header="Title"
+                        />
+                        <Column
+                            field="location"
+                            header="Location"
+                        />
+                        <Column
+                            field="post_on"
+                            header="Posted"
+                        />
+                        <Column
+                            field="closed_date"
+                            header="Closes"
+                        />
+                        <Column
+                            field="status"
+                            header="Status"
+                        />
                         <Column header="Actions">
                             <template #body="{ data }">
                                 <Button
@@ -66,7 +89,9 @@ const props = defineProps<{
                         </Column>
                     </DataTable>
                     <div v-else>
-                        <p class="m-0 text-muted-color text-center my-4">No job listings found.</p>
+                        <p class="m-0 text-muted-color text-center my-4">
+                            No job listings found.
+                        </p>
                     </div>
                 </div>
             </template>

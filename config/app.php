@@ -69,6 +69,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Scheduler Timezone
+    |--------------------------------------------------------------------------
+    |
+    | Scheduled tasks follow the server's (or Docker container's) timezone so
+    | "end of day" means the server's local midnight. Set SCHEDULE_TIMEZONE
+    | to override it.
+    |
+    */
+
+    'schedule_timezone' => env('SCHEDULE_TIMEZONE') ?: App\Support\ServerTimezone::detect((string) env('APP_TIMEZONE', 'UTC')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
     |

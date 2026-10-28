@@ -67,6 +67,15 @@ class JobClosingTest extends TestCase
             ->assertSessionHasErrors('closed_date');
     }
 
+    public function test_malformed_post_date_returns_validation_error_instead_of_server_error(): void
+    {
+        $this->actingAs($this->admin())
+            ->post(route('admin.jobs.store'), $this->jobPayload(['post_on' => ['invalid']]))
+            ->assertSessionHasErrors('post_on');
+
+        $this->assertDatabaseCount('jobs', 0);
+    }
+
     public function test_updating_post_date_revalidates_existing_close_date(): void
     {
         $job = Job::create($this->jobPayload());
@@ -110,5 +119,20 @@ class JobClosingTest extends TestCase
 
         $this->assertNotNull($event);
         $this->assertSame('59 23 * * *', $event->expression);
+        $this->assertSame(config('app.schedule_timezone'), $event->timezone);
+    }
+
+    public function test_archive_command_uses_schedule_timezone_for_today(): void
+    {
+        config(['app.schedule_timezone' => 'America/Chicago']);
+        $this->travelTo(now('UTC')->setDate(2027, 1, 15)->setTime(4, 59));
+
+        $closesTodayInChicago = Job::create($this->jobPayload(['title' => 'Chicago today', 'post_on' => '2026-12-01 09:00:00', 'closed_date' => '2027-01-14']));
+        $closesTodayInUtc = Job::create($this->jobPayload(['title' => 'UTC today', 'post_on' => '2026-12-01 09:00:00', 'closed_date' => '2027-01-15']));
+
+        $this->artisan('jobs:archive-expired')->assertSuccessful();
+
+        $this->assertSame('archived', $closesTodayInChicago->fresh()->status);
+        $this->assertSame('active', $closesTodayInUtc->fresh()->status);
     }
 }

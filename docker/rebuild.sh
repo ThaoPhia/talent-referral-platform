@@ -99,6 +99,16 @@ else
 fi
 
 printf '%s\n' 'Starting container from new image...'
+# Match the container clock to this machine unless .env sets TZ itself.
+timezone=$(get_env_value TZ '')
+if [ -z "$timezone" ]; then
+    timezone=$(readlink /etc/localtime 2>/dev/null | sed -n 's|.*zoneinfo/||p')
+fi
+if [ -n "$timezone" ]; then
+    printf 'Using timezone %s...\n' "$timezone"
+    set -- "$@" -e "TZ=${timezone}"
+fi
+
 docker run -d --name "$container_name" "$@" \
     --env-file .env \
     -e "APP_URL=${app_url}" \

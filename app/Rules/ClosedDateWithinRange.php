@@ -11,7 +11,7 @@ use Throwable;
 
 class ClosedDateWithinRange implements ValidationRule
 {
-    public function __construct(private readonly DateTimeInterface|string|null $postOn)
+    public function __construct(private readonly mixed $postOn)
     {
     }
 
@@ -26,6 +26,10 @@ class ClosedDateWithinRange implements ValidationRule
 
     public function errorFor(mixed $value): ?string
     {
+        if (! $this->isDateLike($this->postOn) || ! $this->isDateLike($value)) {
+            return null;
+        }
+
         try {
             $postOn = Carbon::parse($this->postOn)->startOfDay();
             $closedDate = Carbon::parse($value)->startOfDay();
@@ -48,5 +52,10 @@ class ClosedDateWithinRange implements ValidationRule
         }
 
         return null;
+    }
+
+    private function isDateLike(mixed $value): bool
+    {
+        return $value instanceof DateTimeInterface || (is_string($value) && $value !== '');
     }
 }

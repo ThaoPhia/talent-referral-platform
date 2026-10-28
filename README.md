@@ -110,7 +110,9 @@ DOCKER_VOLUME_NAME=talent-referral-platform-sqlite
 
 The SQLite database volume is preserved when the container is replaced. To keep the database in a folder on your computer instead (for example, to open it in DBeaver), set `DOCKER_DATA_DIR` to that folder's path in `.env`. The rebuild scripts create the folder if needed and mount it in place of the volume. The local `public/` directory is mounted into the container so Laravel can see Vite's live hot file and development fonts manifest.
 
-The container also runs Laravel's scheduler (`php artisan schedule:work`) next to Apache, so scheduled tasks such as the nightly `jobs:archive-expired` run automatically and appear in `docker logs`. The scheduler restarts itself if it stops. Set `RUN_SCHEDULER=false` in `.env` to turn it off. Check the schedule with:
+The container also runs Laravel's scheduler (`php artisan schedule:work`) next to Apache, so scheduled tasks such as the nightly `jobs:archive-expired` run automatically and appear in `docker logs`. The scheduler restarts itself if it stops. Set `RUN_SCHEDULER=false` in `.env` to turn it off.
+
+Scheduled tasks follow the server's timezone, not `APP_TIMEZONE`, so the nightly archive runs at 11:59 PM server time. `docker:rebuild` passes your computer's timezone to the container as `TZ`. To use a different one, set `TZ` (the container's clock) or `SCHEDULE_TIMEZONE` (the scheduler only) in `.env`. Check the schedule with:
 
 ```bash
 docker exec talent-referral-platform php artisan schedule:list

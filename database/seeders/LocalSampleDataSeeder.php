@@ -17,6 +17,9 @@ class LocalSampleDataSeeder extends Seeder
         }
 
         $faker = fake();
+        // Destroying a stale Faker\Generator calls mt_srand(), so collect any
+        // pending ones now instead of letting GC reshuffle the seeded sequence.
+        gc_collect_cycles();
         $faker->seed(20261016);
         $faker->unique(true);
 
