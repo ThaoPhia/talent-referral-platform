@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Job;
 use App\Models\User;
+use App\Rules\ClosedDateWithinRange;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +22,16 @@ class StoreJobRequest extends FormRequest
             'description' => ['required', 'string'],
             'location' => ['required', 'string', 'max:255'],
             'post_on' => ['required', 'date'],
-            'status' => ['sometimes', Rule::in(['active', 'archived'])],
+            'closed_date' => ['required', 'date', new ClosedDateWithinRange($this->input('post_on'))],
+            'status' => ['sometimes', Rule::in(Job::STATUSES)],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'post_on' => 'post date',
+            'closed_date' => 'close date',
         ];
     }
 }

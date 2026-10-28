@@ -6,13 +6,18 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['title', 'description', 'location', 'post_on', 'status'])]
+#[Fillable(['title', 'description', 'location', 'post_on', 'closed_date', 'status'])]
 class Job extends Model
 {
+    public const STATUSES = ['draft', 'active', 'archived'];
+
+    public const MAX_OPEN_MONTHS = 3;
+
     protected function casts(): array
     {
         return [
             'post_on' => 'immutable_datetime',
+            'closed_date' => 'immutable_date:Y-m-d',
         ];
     }
 

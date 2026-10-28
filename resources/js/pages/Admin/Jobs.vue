@@ -11,7 +11,8 @@ const props = defineProps<{
         title: string,
         location: string,
         post_on: string,
-        status: 'active' | 'archived',
+        closed_date: string,
+        status: 'draft' | 'active' | 'archived',
     }>,
 }>()
 </script>
@@ -45,6 +46,7 @@ const props = defineProps<{
                         <Column field="title" header="Title" />
                         <Column field="location" header="Location" />
                         <Column field="post_on" header="Posted" />
+                        <Column field="closed_date" header="Closes" />
                         <Column field="status" header="Status" />
                         <Column header="Actions">
                             <template #body="{ data }">

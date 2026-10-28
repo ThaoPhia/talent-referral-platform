@@ -22,6 +22,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
+            'closed_date' => '2026-12-24',
         ]);
 
         $response->assertRedirect();
@@ -40,6 +41,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
+            'closed_date' => '2026-12-24',
         ]);
 
         $response->assertForbidden();
@@ -55,6 +57,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
+            'closed_date' => '2026-12-24',
         ]);
 
         $this->actingAs($admin)
@@ -71,6 +74,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
+            'closed_date' => '2026-12-24',
         ]);
 
         $response = $this->actingAs($admin)->patch(route('admin.jobs.update', $job), [
@@ -104,6 +108,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
+            'closed_date' => '2026-12-24',
         ]);
 
         $response = $this->actingAs($referrer)->post(route('referrals.store'), [
@@ -131,6 +136,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
+            'closed_date' => '2026-12-24',
         ]);
 
         $this->actingAs($referrer)->post(route('referrals.store'), [
@@ -169,6 +175,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
+            'closed_date' => '2026-12-24',
         ]);
 
         $this->actingAs($candidate)->post(route('referrals.store'), [
@@ -190,6 +197,7 @@ class JobsAndReferralsTest extends TestCase
             'description' => 'Build great things.',
             'location' => 'Remote',
             'post_on' => '2026-09-24 09:00:00',
+            'closed_date' => '2026-12-24',
         ]);
 
         $response = $this->actingAs($admin)->post(route('referrals.store'), [

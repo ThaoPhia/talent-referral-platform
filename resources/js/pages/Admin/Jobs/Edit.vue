@@ -10,7 +10,8 @@ interface Job {
     description: string
     location: string
     post_on: string
-    status: 'active' | 'archived'
+    closed_date: string
+    status: 'draft' | 'active' | 'archived'
 }
 
 const props = defineProps<{
