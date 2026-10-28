@@ -1,6 +1,5 @@
 /.phpunit.cache
 /docker/certs/
-/docker/local/
 /bootstrap/ssr
 /node_modules
 /public/build
