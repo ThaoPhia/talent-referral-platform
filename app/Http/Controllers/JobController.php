@@ -14,7 +14,7 @@ class JobController extends Controller
 {
     public function index(Request $request): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        abort_unless($request->user()?->isAdmin() === true, 403);
 
         return Inertia::render('Admin/Jobs', [
             'jobs' => Job::query()->latest('post_on')->get(),
@@ -23,7 +23,7 @@ class JobController extends Controller
 
     public function create(Request $request): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        abort_unless($request->user()?->isAdmin() === true, 403);
 
         return Inertia::render('Admin/Jobs/Create');
     }
@@ -44,7 +44,7 @@ class JobController extends Controller
 
     public function edit(Request $request, Job $job): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        abort_unless($request->user()?->isAdmin() === true, 403);
 
         return Inertia::render('Admin/Jobs/Edit', [
             'job' => $job,

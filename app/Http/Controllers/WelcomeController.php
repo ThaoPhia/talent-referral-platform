@@ -25,7 +25,7 @@ class WelcomeController extends Controller
             'jobs' => Job::query()
                 ->where('status', 'active')
                 ->where('post_on', '<=', now())
-                ->when($search !== '', fn($query) => $query->where(fn($query) => $query
+                ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                     ->whereRaw("lower(title) like lower(?) escape '!'", [$searchTerm])
                     ->orWhereRaw("lower(description) like lower(?) escape '!'", [$searchTerm])
                     ->orWhereRaw("lower(location) like lower(?) escape '!'", [$searchTerm])))

@@ -38,7 +38,7 @@ class WelcomeJobsTest extends TestCase
         ]);
 
         $this->get(route('welcome'))
-            ->assertInertia(fn($page) => $page
+            ->assertInertia(fn ($page) => $page
                 ->component('Welcome')
                 ->has('jobs.data', 1)
                 ->where('jobs.data.0.id', $publishedJob->id));
@@ -57,21 +57,21 @@ class WelcomeJobsTest extends TestCase
         }
 
         $this->get(route('welcome'))
-            ->assertInertia(fn($page) => $page
+            ->assertInertia(fn ($page) => $page
                 ->has('jobs.data', 10)
                 ->where('jobs.per_page', 10)
                 ->where('jobs.total', 12));
 
         $this->get(route('welcome', ['page' => 2]))
-            ->assertInertia(fn($page) => $page
+            ->assertInertia(fn ($page) => $page
                 ->has('jobs.data', 2)
                 ->where('jobs.current_page', 2));
 
         $this->get(route('welcome', ['per_page' => 20]))
-            ->assertInertia(fn($page) => $page->has('jobs.data', 12));
+            ->assertInertia(fn ($page) => $page->has('jobs.data', 12));
 
         $this->get(route('welcome', ['per_page' => 50]))
-            ->assertInertia(fn($page) => $page->where('jobs.per_page', 10));
+            ->assertInertia(fn ($page) => $page->where('jobs.per_page', 10));
     }
 
     public function test_homepage_filters_jobs_by_search(): void
@@ -93,7 +93,7 @@ class WelcomeJobsTest extends TestCase
         ]);
 
         $this->get(route('welcome', ['search' => 'laravel']))
-            ->assertInertia(fn($page) => $page
+            ->assertInertia(fn ($page) => $page
                 ->where('search', 'laravel')
                 ->has('jobs.data', 1)
                 ->where('jobs.data.0.id', $match->id));
@@ -110,9 +110,9 @@ class WelcomeJobsTest extends TestCase
         ]);
 
         $this->get(route('welcome', ['search' => '%']))
-            ->assertInertia(fn($page) => $page->has('jobs.data', 0));
+            ->assertInertia(fn ($page) => $page->has('jobs.data', 0));
 
         $this->get(route('welcome', ['search' => 'Des_gner']))
-            ->assertInertia(fn($page) => $page->has('jobs.data', 0));
+            ->assertInertia(fn ($page) => $page->has('jobs.data', 0));
     }
 }

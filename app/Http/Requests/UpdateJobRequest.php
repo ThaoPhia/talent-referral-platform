@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Job;
 use App\Models\User;
 use App\Rules\ClosedDateWithinRange;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -16,6 +17,9 @@ class UpdateJobRequest extends FormRequest
         return $this->user() instanceof User && $this->user()->isAdmin();
     }
 
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [

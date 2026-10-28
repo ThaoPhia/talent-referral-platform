@@ -21,6 +21,9 @@ class Job extends Model
         ];
     }
 
+    /**
+     * @return HasMany<Referral, $this>
+     */
     public function referrals(): HasMany
     {
         return $this->hasMany(Referral::class);

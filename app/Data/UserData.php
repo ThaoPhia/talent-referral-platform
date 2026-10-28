@@ -19,7 +19,8 @@ class UserData extends Data
         public ?CarbonImmutable $emailVerifiedAt,
         public CarbonImmutable $createdAt,
         public CarbonImmutable $updatedAt,
-    ) {}
+    ) {
+    }
 
     public static function fromModel(User $user): self
     {

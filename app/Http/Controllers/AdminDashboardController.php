@@ -10,7 +10,7 @@ class AdminDashboardController extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        abort_unless($request->user()?->isAdmin() === true, 403);
 
         return Inertia::render('Admin/Dashboard');
     }

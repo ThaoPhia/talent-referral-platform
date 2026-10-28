@@ -34,7 +34,8 @@ class LocalSampleDataSeeder extends Seeder
                 sprintf('sample.referrer.%02d@example.test', $index),
                 'referrer',
                 $index,
-            ));
+            ))
+            ->all();
 
         $candidates = collect(range(1, 10))
             ->map(fn (int $index): User => $this->saveSampleUser(
@@ -42,7 +43,8 @@ class LocalSampleDataSeeder extends Seeder
                 sprintf('sample.candidate.%02d@example.test', $index),
                 'candidate',
                 $index + 15,
-            ));
+            ))
+            ->all();
 
         $jobs = collect(range(1, 25))
             ->map(function (int $index) use ($faker): Job {
@@ -58,7 +60,8 @@ class LocalSampleDataSeeder extends Seeder
                         'status' => $index > 22 ? 'archived' : 'active',
                     ],
                 );
-            });
+            })
+            ->all();
 
         $statuses = ['pending', 'accepted', 'rejected'];
 
@@ -66,7 +69,7 @@ class LocalSampleDataSeeder extends Seeder
             Referral::query()->updateOrCreate(
                 [
                     'user_id' => $referrers[$index]->id,
-                    'candidate_id' => $candidates[$index % $candidates->count()]->id,
+                    'candidate_id' => $candidates[$index % count($candidates)]->id,
                     'job_id' => $jobs[$index]->id,
                 ],
                 ['status' => $statuses[$index % count($statuses)]],

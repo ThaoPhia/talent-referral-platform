@@ -6,6 +6,7 @@ use App\Http\Requests\StoreReferralRequest;
 use App\Http\Requests\UpdateReferralRequest;
 use App\Models\Referral;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,7 @@ class ReferralController extends Controller
 {
     public function index(Request $request): Response
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        abort_unless($request->user()?->isAdmin() === true, 403);
 
         return Inertia::render('Admin/Referrals', [
             'referrals' => Referral::query()
@@ -28,10 +29,8 @@ class ReferralController extends Controller
         ]);
     }
 
-    public function store(StoreReferralRequest $request): RedirectResponse
+    public function store(StoreReferralRequest $request, #[CurrentUser] User $user): RedirectResponse
     {
-        $user = $request->user();
-
         DB::transaction(function () use ($request, $user): void {
             $candidate = User::firstOrNew([
                 'email' => $request->string('candidate_email')->toString(),
