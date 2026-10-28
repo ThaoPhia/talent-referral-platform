@@ -1,6 +1,6 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { usePage, useForm } from '@inertiajs/vue3'
-import { LayoutGrid, House, Info, Settings, LogOut, ExternalLink } from '@lucide/vue'
+import { LayoutGrid, House, Settings, LogOut } from '@lucide/vue'
 import { MenuItem } from '@/types'
 import { route } from '@/utils/route'
 
