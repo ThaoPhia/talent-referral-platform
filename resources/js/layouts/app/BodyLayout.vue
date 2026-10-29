@@ -14,6 +14,8 @@ const props = withDefaults(defineProps<{
     breadcrumbs: () => [],
 })
 
+const copyrightYear = new Date().getFullYear()
+
 const {
     currentRoute,
     mobileMenuOpen,
@@ -38,7 +40,7 @@ const {
                 />
             </Teleport>
         </ClientOnly>
-        <div class="min-h-screen overflow-x-clip">
+        <div class="flex min-h-screen flex-col overflow-x-clip">
             <PrimaryNavigation
                 :current-route="currentRoute"
                 :menu-items="menuItems"
@@ -46,7 +48,7 @@ const {
                 @open-mobile-menu="mobileMenuOpen = true"
             />
 
-            <main>
+            <main class="flex-1">
                 <Container vertical>
                     <!-- Session-based Flash Messages -->
                     <FlashMessages />
@@ -61,6 +63,14 @@ const {
                     <slot />
                 </Container>
             </main>
+
+            <footer class="border-t border-surface-200 py-6 text-sm text-muted-color dark:border-surface-800">
+                <Container>
+                    <p class="m-0 text-center">
+                        &copy; {{ copyrightYear }} Talent Referral Platform. All rights reserved.
+                    </p>
+                </Container>
+            </footer>
         </div>
     </div>
 </template>
