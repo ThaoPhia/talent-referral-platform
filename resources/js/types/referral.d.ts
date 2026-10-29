@@ -12,17 +12,18 @@ export interface Referral {
     viewed_at: string | null
     responded_at: string | null
     created_at: string
+    // Null only if the related row was deleted outside the app.
     referrer: {
         name: string
         email: string
-    }
+    } | null
     candidate: {
         name: string
         email: string
-    }
+    } | null
     job: {
         title: string
-    }
+    } | null
 }
 
 export interface ReferralStats {

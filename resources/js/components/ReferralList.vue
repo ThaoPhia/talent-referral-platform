@@ -68,23 +68,40 @@ const updateReferral = () => {
         <Column header="Candidate">
             <template #body="{ data }">
                 <div class="flex flex-col">
-                    <span class="font-medium">{{ data.candidate.name }}</span>
-                    <span class="text-sm text-muted-color">{{ data.candidate.email }}</span>
+                    <template v-if="data.candidate">
+                        <span class="font-medium">{{ data.candidate.name }}</span>
+                        <span class="text-sm text-muted-color">{{ data.candidate.email }}</span>
+                    </template>
+                    <span
+                        v-else
+                        class="text-muted-color italic"
+                    >Deleted candidate</span>
                 </div>
             </template>
         </Column>
         <Column header="Referred by">
             <template #body="{ data }">
                 <div class="flex flex-col">
-                    <span>{{ data.referrer.name }}</span>
-                    <span class="text-sm text-muted-color">{{ data.referrer.email }}</span>
+                    <template v-if="data.referrer">
+                        <span>{{ data.referrer.name }}</span>
+                        <span class="text-sm text-muted-color">{{ data.referrer.email }}</span>
+                    </template>
+                    <span
+                        v-else
+                        class="text-muted-color italic"
+                    >Deleted user</span>
                 </div>
             </template>
         </Column>
-        <Column
-            field="job.title"
-            header="Job"
-        />
+        <Column header="Job">
+            <template #body="{ data }">
+                <span v-if="data.job">{{ data.job.title }}</span>
+                <span
+                    v-else
+                    class="text-muted-color italic"
+                >Deleted job</span>
+            </template>
+        </Column>
         <Column header="Resume">
             <template #body="{ data }">
                 <a

@@ -506,7 +506,7 @@ class ReferralWorkflowTest extends TestCase
         $this->actingAs($referrer)
             ->get(route('dashboard'))
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Dashboard')
+                ->component('Referrer/Dashboard')
                 ->has('referrals', 4)
                 ->where('stats', [
                     'total' => 4,

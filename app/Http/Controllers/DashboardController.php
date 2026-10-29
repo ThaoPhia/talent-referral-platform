@@ -19,7 +19,7 @@ class DashboardController extends Controller
 
         $referrals = fn () => Referral::query()->where('user_id', $request->user()?->id);
 
-        return Inertia::render('Dashboard', [
+        return Inertia::render('Referrer/Dashboard', [
             'stats' => ReferralStats::for($referrals()),
             'referrals' => $referrals()
                 ->with(['referrer', 'candidate', 'job'])
