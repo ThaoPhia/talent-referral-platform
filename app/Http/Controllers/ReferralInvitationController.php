@@ -68,6 +68,7 @@ class ReferralInvitationController extends Controller
         $validated = $request->validate([
             'decision' => ['required', Rule::in(['accepted', 'rejected'])],
             'candidate_note' => ['nullable', 'string', 'max:5000'],
+            // Either a resume URL or a file must be provided if accepting the referral.
             'resume_url' => [
                 Rule::requiredIf($accepting && ! $request->hasFile('resume_file')),
                 'nullable',
