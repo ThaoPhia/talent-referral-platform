@@ -23,7 +23,7 @@ class ReferralController extends Controller
     {
         abort_unless($request->user()?->isAdmin() === true, 403);
 
-        return Inertia::render('Admin/Referrals', [
+        return Inertia::render('Dashboard/Admin/Referrals', [
             'referrals' => Referral::query()
                 ->with(['referrer', 'candidate', 'job'])
                 ->latest()

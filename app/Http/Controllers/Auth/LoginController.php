@@ -12,7 +12,7 @@ class LoginController extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        return Inertia::render('auth/Login', [
+        return Inertia::render('Auth/Login', [
             'canResetPassword' => Features::enabled(Features::resetPasswords()),
             'canRegister' => Features::enabled(Features::registration()),
             'status' => $request->session()->get('status'),

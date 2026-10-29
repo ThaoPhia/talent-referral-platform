@@ -10,6 +10,6 @@ class AppearanceController extends Controller
 {
     public function __invoke(): Response
     {
-        return Inertia::render('settings/Appearance');
+        return Inertia::render('Dashboard/Settings/Appearance');
     }
 }

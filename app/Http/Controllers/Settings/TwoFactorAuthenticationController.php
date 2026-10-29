@@ -37,7 +37,7 @@ class TwoFactorAuthenticationController extends Controller implements HasMiddlew
             $setupKey = Fortify::currentEncrypter()->decrypt($user->two_factor_secret);
         }
 
-        return Inertia::render('settings/TwoFactor', [
+        return Inertia::render('Dashboard/Settings/TwoFactor', [
             'status' => $request->session()->get('status'),
             'requiresConfirmation' => Features::optionEnabled(Features::twoFactorAuthentication(), 'confirm'),
             'twoFactorEnabled' => $user->hasEnabledTwoFactorAuthentication(),

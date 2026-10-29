@@ -21,7 +21,7 @@ class AdminDashboardController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        return Inertia::render('Admin/Dashboard', [
+        return Inertia::render('Dashboard/Admin/Index', [
             'stats' => ReferralStats::for(Referral::query()),
             'jobStats' => collect(Job::STATUSES)
                 ->mapWithKeys(fn (string $status) => [$status => (int) ($jobCounts[$status] ?? 0)])

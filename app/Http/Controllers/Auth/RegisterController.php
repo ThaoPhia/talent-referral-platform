@@ -10,6 +10,6 @@ class RegisterController extends Controller
 {
     public function __invoke(): Response
     {
-        return Inertia::render('auth/Register');
+        return Inertia::render('Auth/Register');
     }
 }

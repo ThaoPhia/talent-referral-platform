@@ -16,7 +16,7 @@ class JobController extends Controller
     {
         abort_unless($request->user()?->isAdmin() === true, 403);
 
-        return Inertia::render('Admin/Jobs', [
+        return Inertia::render('Dashboard/Admin/Jobs', [
             'jobs' => Job::query()->latest('post_on')->get(),
         ]);
     }
@@ -25,7 +25,7 @@ class JobController extends Controller
     {
         abort_unless($request->user()?->isAdmin() === true, 403);
 
-        return Inertia::render('Admin/Jobs/Create');
+        return Inertia::render('Dashboard/Admin/Jobs/Create');
     }
 
     public function store(StoreJobRequest $request): RedirectResponse
@@ -46,7 +46,7 @@ class JobController extends Controller
     {
         abort_unless($request->user()?->isAdmin() === true, 403);
 
-        return Inertia::render('Admin/Jobs/Edit', [
+        return Inertia::render('Dashboard/Admin/Jobs/Edit', [
             'job' => $job,
         ]);
     }
