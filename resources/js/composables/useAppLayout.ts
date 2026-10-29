@@ -1,6 +1,6 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { usePage, useForm } from '@inertiajs/vue3'
-import { LayoutGrid, House, Settings, LogOut } from '@lucide/vue'
+import { LayoutGrid, Settings, LogOut } from '@lucide/vue'
 import { MenuItem } from '@/types'
 import { route } from '@/utils/route'
 
@@ -10,13 +10,6 @@ export function useAppLayout() {
 
     // Menu items
     const menuItems = computed<MenuItem[]>(() => [
-        {
-            key: 'home',
-            label: 'Home',
-            lucideIcon: House,
-            route: '/',
-            active: currentRoute.value == 'welcome',
-        },
         ...(page.props.auth.user ? [{
             key: 'dashboard',
             label: 'Dashboard',
