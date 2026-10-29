@@ -282,6 +282,106 @@ class ReferralWorkflowTest extends TestCase
         Notification::assertSentTo($referral->candidate, ReferralInvitation::class);
     }
 
+    public function test_referral_creation_is_limited_before_candidate_creation_or_email(): void
+    {
+        Notification::fake();
+        $this->actingAs($this->user('referrer'));
+        $job = $this->job();
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('referrals.store'), $this->referralPayload($job, [
+                'candidate_email' => "candidate{$i}@example.test",
+            ]))->assertRedirect()->assertSessionHasNoErrors();
+        }
+
+        $this->post(route('referrals.store'), $this->referralPayload($job, [
+            'candidate_email' => 'blocked@example.test',
+        ]))->assertStatus(429);
+        $this->assertDatabaseCount('referrals', 5);
+        $this->assertDatabaseMissing('users', ['email' => 'blocked@example.test']);
+        Notification::assertSentTimes(ReferralInvitation::class, 5);
+
+        $this->travel(61)->seconds();
+        $this->post(route('referrals.store'), $this->referralPayload($job, [
+            'candidate_email' => 'blocked@example.test',
+        ]))->assertRedirect()->assertSessionHasNoErrors();
+        Notification::assertSentTimes(ReferralInvitation::class, 6);
+    }
+
+    public function test_creation_limits_follow_the_referrer_across_ips_and_the_ip_across_referrers(): void
+    {
+        Notification::fake();
+        $referrer = $this->user('referrer');
+        $job = $this->job();
+        $this->actingAs($referrer);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('referrals.store'), $this->referralPayload($job, [
+                'candidate_email' => "candidate{$i}@example.test",
+            ]))->assertRedirect()->assertSessionHasNoErrors();
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.2'])
+            ->post(route('referrals.store'), $this->referralPayload($job))
+            ->assertStatus(429);
+        $this->withServerVariables(['REMOTE_ADDR' => '127.0.0.1'])
+            ->actingAs($this->user('referrer'))
+            ->post(route('referrals.store'), $this->referralPayload($job))
+            ->assertStatus(429);
+        $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.3'])
+            ->post(route('referrals.store'), $this->referralPayload($job))
+            ->assertRedirect()->assertSessionHasNoErrors();
+        Notification::assertSentTimes(ReferralInvitation::class, 6);
+    }
+
+    public function test_guest_invitation_and_contact_limits_are_independent(): void
+    {
+        Notification::fake();
+        $referral = $this->referral();
+        $url = route('referrals.invitation.show', ['token' => $this->token($referral)]);
+        $contact = ['name' => 'Alex', 'email' => 'alex@example.test', 'message' => 'Hello'];
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->get($url)->assertOk();
+        }
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('contact.store'), $contact)->assertRedirect(route('contact'));
+        }
+        $this->post(route('contact.store'), $contact)->assertStatus(429);
+        for ($i = 5; $i < 30; $i++) {
+            $this->get($url)->assertOk();
+        }
+        $this->get($url)->assertStatus(429);
+        $this->post(route('referrals.invitation.respond', ['token' => $this->token($referral)]), [
+            'decision' => 'rejected',
+        ])->assertStatus(429);
+        $this->assertSame('pending', $referral->fresh()->status);
+    }
+
+    public function test_authenticated_contact_creation_and_resend_limits_are_independent(): void
+    {
+        Notification::fake();
+        $referral = $this->referral();
+        $this->actingAs($referral->referrer);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('contact.store'), [
+                'name' => 'Alex', 'email' => 'alex@example.test', 'message' => 'Hello',
+            ])->assertRedirect(route('contact'));
+        }
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('referrals.store'), $this->referralPayload($referral->job, [
+                'candidate_email' => "independent{$i}@example.test",
+            ]))->assertRedirect()->assertSessionHasNoErrors();
+        }
+        $this->post(route('referrals.store'), $this->referralPayload($referral->job))->assertStatus(429);
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('referrals.resend', $referral))->assertRedirect();
+        }
+        $this->post(route('referrals.resend', $referral))->assertStatus(429);
+        Notification::assertSentTimes(ReferralInvitation::class, 10);
+    }
+
     public function test_invitation_resends_are_rate_limited(): void
     {
         Notification::fake();

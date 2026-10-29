@@ -56,7 +56,9 @@ php artisan migrate
 
 Admins and the owning referrer can use **Resend invitation** in their referral list
 to retry an invitation after a mail outage. Only pending referrals for open jobs can
-be resent; requests are limited to five per minute per IP. A failed send keeps the
+be resent; creation and resend requests each have independent limits of five per
+minute per user and per IP. Creation limits apply before database writes or email
+delivery. A failed send keeps the
 referral and shows a warning so it can be retried later.
 
 Candidate responses use an atomic pending-to-decided update. Only the winning
@@ -77,6 +79,8 @@ The public About Us (`/about`) and Contact Us (`/contact`) pages are linked in t
 Contact messages are emailed to `MAIL_FROM_ADDRESS`, with the visitor's email as Reply-To.
 Configure your mail transport before deploying; local messages can be viewed in Mailpit.
 Submissions are limited to five per minute per IP address.
+Contact submissions, referral creation, invitation viewing/responses (30 per minute
+per IP), and resends use separate rate-limit counters.
 
 Set `CONTACT_ADDRESS` in `.env` to change the displayed postal address. The default in
 `config/contact.php` is a placeholder, not a real office address; replace it before launch.

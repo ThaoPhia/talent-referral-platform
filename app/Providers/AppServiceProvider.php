@@ -3,8 +3,11 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +27,31 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureRateLimiters();
+    }
+
+    /** 
+     * Configure rate limiters for the application.
+     */
+    protected function configureRateLimiters(): void
+    {
+        // Rate limiter for creating referrals. Limits to 5 per minute per user and per IP.
+        RateLimiter::for('referral-creation', fn (Request $request) => [
+            Limit::perMinute(5)->by('user:'.$request->user()?->id),
+            Limit::perMinute(5)->by('ip:'.$request->ip()),
+        ]);
+
+        // Rate limiter for resending referrals. Limits to 5 per minute per user and per IP.
+        RateLimiter::for('referral-resend', fn (Request $request) => [
+            Limit::perMinute(5)->by('user:'.$request->user()?->id),
+            Limit::perMinute(5)->by('ip:'.$request->ip()),
+        ]);
+
+        // Rate limiter for contact form submissions. Limits to 2 per minute per IP.
+        RateLimiter::for('contact-submission', fn (Request $request) => Limit::perMinute(2)->by($request->ip()));
+
+        // Rate limiter for referral invitations. Limits to 5 per minute per IP.
+        RateLimiter::for('referral-invitation', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
     }
 
     /**

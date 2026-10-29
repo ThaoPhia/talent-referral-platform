@@ -18,7 +18,7 @@ Route::get('/', WelcomeController::class)->name('welcome');
 Route::get('/about', fn () => Inertia::render('About'))->name('about');
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])
-    ->middleware('throttle:5,1')
+    ->middleware('throttle:contact-submission')
     ->name('contact.store');
 
 // Fortify handled post requests for login, registration, password reset, etc.
@@ -44,16 +44,18 @@ Route::middleware(['auth', 'verified'])
     });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::post('/referrals', [ReferralController::class, 'store'])->name('referrals.store');
+    Route::post('/referrals', [ReferralController::class, 'store'])
+        ->middleware('throttle:referral-creation')
+        ->name('referrals.store');
     Route::post('/referrals/{referral}/resend', [ReferralController::class, 'resend'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:referral-resend')
         ->name('referrals.resend');
     Route::get('/referrals/{referral}/resume', ReferralResumeController::class)->name('referrals.resume');
     Route::post('/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');
 });
 
 // Candidates open these from the encrypted link in their invitation email, without logging in.
-Route::middleware('throttle:30,1')
+Route::middleware('throttle:referral-invitation')
     ->prefix('referrals/invitation')
     ->name('referrals.invitation.')
     ->group(function () {
