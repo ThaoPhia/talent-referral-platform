@@ -5,7 +5,10 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\ReferralInvitationController;
+use App\Http\Controllers\ReferralResumeController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +38,17 @@ Route::middleware(['auth', 'verified'])
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/referrals', [ReferralController::class, 'store'])->name('referrals.store');
+    Route::get('/referrals/{referral}/resume', ReferralResumeController::class)->name('referrals.resume');
+    Route::post('/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');
 });
+
+// Candidates open these from the encrypted link in their invitation email, without logging in.
+Route::middleware('throttle:30,1')
+    ->prefix('referrals/invitation')
+    ->name('referrals.invitation.')
+    ->group(function () {
+        Route::get('/{token}', [ReferralInvitationController::class, 'show'])->name('show');
+        Route::post('/{token}', [ReferralInvitationController::class, 'respond'])->name('respond');
+    });
 
 require __DIR__ . '/settings.php';

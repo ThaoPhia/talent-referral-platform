@@ -7,6 +7,7 @@ import Container from '@/components/Container.vue'
 import PopupMenuButton from '@/components/PopupMenuButton.vue'
 import NavLogoLink from '@/components/NavLogoLink.vue'
 import FlashMessages from '@/components/FlashMessages.vue'
+import NotificationBell from '@/components/NotificationBell.vue'
 import Menubar from '@/components/router-link-menus/Menubar.vue'
 import PanelMenu from '@/components/router-link-menus/PanelMenu.vue'
 import Breadcrumb from '@/components/router-link-menus/Breadcrumb.vue'
@@ -79,30 +80,34 @@ const {
                             </div>
                         </template>
                         <template #end>
-                            <!-- User Dropdown Menu -->
-                            <div class="hidden lg:flex">
-                                <PopupMenuButton
-                                    name="desktop-user-menu-dd"
-                                    side="right"
-                                    severity="secondary"
-                                    :menu-items="userMenuItems"
-                                    :label="page.props.auth.user?.name"
-                                    text
-                                />
-                            </div>
+                            <div class="flex items-center gap-1">
+                                <NotificationBell />
 
-                            <!-- Mobile Menu Toggle -->
-                            <div class="flex lg:hidden">
-                                <Button
-                                    severity="secondary"
-                                    class="p-1!"
-                                    text
-                                    @click="mobileMenuOpen = true"
-                                >
-                                    <template #icon>
-                                        <MenuIcon class="size-6!" />
-                                    </template>
-                                </Button>
+                                <!-- User Dropdown Menu -->
+                                <div class="hidden lg:flex">
+                                    <PopupMenuButton
+                                        name="desktop-user-menu-dd"
+                                        side="right"
+                                        severity="secondary"
+                                        :menu-items="userMenuItems"
+                                        :label="page.props.auth.user?.name"
+                                        text
+                                    />
+                                </div>
+
+                                <!-- Mobile Menu Toggle -->
+                                <div class="flex lg:hidden">
+                                    <Button
+                                        severity="secondary"
+                                        class="p-1!"
+                                        text
+                                        @click="mobileMenuOpen = true"
+                                    >
+                                        <template #icon>
+                                            <MenuIcon class="size-6!" />
+                                        </template>
+                                    </Button>
+                                </div>
                             </div>
                         </template>
                     </Menubar>

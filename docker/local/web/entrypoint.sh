@@ -20,6 +20,19 @@ if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
     chmod ug+rwx "$db_dir"
 fi
 
+# Uploaded resumes live on the persistent mount so they survive image rebuilds.
+resume_dir="$DATA_DIR/resumes"
+app_resume_dir=storage/app/private/resumes
+mkdir -p "$resume_dir" "$(dirname "$app_resume_dir")"
+if [ ! -L "$app_resume_dir" ]; then
+    if [ -d "$app_resume_dir" ]; then
+        cp -a "$app_resume_dir/." "$resume_dir/"
+        rm -rf "$app_resume_dir"
+    fi
+    ln -s "$resume_dir" "$app_resume_dir"
+fi
+chown -R www-data:www-data "$resume_dir" "$(dirname "$app_resume_dir")"
+
 runuser -u www-data -- php artisan migrate --force
 
 # Run Laravel's scheduler alongside Apache, restarting it if it ever exits.

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Referral;
+use App\Support\ReferralStats;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,10 +17,12 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        $referrals = fn () => Referral::query()->where('user_id', $request->user()?->id);
+
         return Inertia::render('Dashboard', [
-            'referrals' => Referral::query()
+            'stats' => ReferralStats::for($referrals()),
+            'referrals' => $referrals()
                 ->with(['referrer', 'candidate', 'job'])
-                ->where('user_id', $request->user()?->id)
                 ->latest()
                 ->get(),
         ]);

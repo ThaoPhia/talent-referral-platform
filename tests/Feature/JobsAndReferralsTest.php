@@ -123,8 +123,7 @@ class JobsAndReferralsTest extends TestCase
         $response = $this->actingAs($referrer)->post(route('referrals.store'), [
             'candidate_name' => $candidate->name,
             'candidate_email' => $candidate->email,
-            'resume_url' => 'https://example.com/resume.pdf',
-            'note' => 'Strong candidate.',
+            'referrer_note' => 'Strong candidate.',
             'job_id' => $job->id,
         ]);
 
@@ -134,6 +133,8 @@ class JobsAndReferralsTest extends TestCase
             'candidate_id' => $candidate->id,
             'job_id' => $job->id,
             'status' => 'pending',
+            'referrer_note' => 'Strong candidate.',
+            'candidate_note' => null,
         ]);
     }
 
@@ -151,8 +152,7 @@ class JobsAndReferralsTest extends TestCase
         $this->actingAs($referrer)->post(route('referrals.store'), [
             'candidate_name' => 'New Candidate',
             'candidate_email' => 'candidate@example.com',
-            'resume_url' => 'https://example.com/resume.pdf',
-            'note' => 'Strong candidate.',
+            'referrer_note' => 'Strong candidate.',
             'job_id' => $job->id,
         ])->assertRedirect();
 
@@ -190,8 +190,7 @@ class JobsAndReferralsTest extends TestCase
         $this->actingAs($candidate)->post(route('referrals.store'), [
             'candidate_name' => 'Someone Else',
             'candidate_email' => 'someone@example.com',
-            'resume_url' => 'https://example.com/resume.pdf',
-            'note' => 'Strong candidate.',
+            'referrer_note' => 'Strong candidate.',
             'job_id' => $job->id,
         ])->assertForbidden();
     }
@@ -232,8 +231,7 @@ class JobsAndReferralsTest extends TestCase
         $refer = fn (Job $job) => $this->actingAs($referrer)->post(route('referrals.store'), [
             'candidate_name' => 'Jane Candidate',
             'candidate_email' => 'jane@example.com',
-            'resume_url' => 'https://example.com/resume.pdf',
-            'note' => 'Strong candidate.',
+            'referrer_note' => 'Strong candidate.',
             'job_id' => $job->id,
         ]);
 

@@ -6,6 +6,7 @@ docker/certs
 node_modules
 vendor
 storage/logs/*
+storage/app/private/*
 storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*

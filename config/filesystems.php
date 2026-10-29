@@ -36,6 +36,14 @@ return [
             'throw' => false,
         ],
 
+        // Candidate resumes are private; they're only served through an authorized download route.
+        'resumes' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/resumes'),
+            'visibility' => 'private',
+            'throw' => true,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

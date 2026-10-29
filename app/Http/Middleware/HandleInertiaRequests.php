@@ -46,6 +46,18 @@ class HandleInertiaRequests extends Middleware
                 'user' => Auth::check() ? UserData::from($request->user()) : null,
             ],
             'queryParams' => Inertia::always($request->query()),
+            'notifications' => fn () => $request->user() === null ? null : [
+                'unread_count' => $request->user()->unreadNotifications()->count(),
+                'items' => $request->user()->notifications()->latest()->limit(10)->get()
+                    ->map(fn ($notification) => [
+                        'id' => $notification->id,
+                        'message' => $notification->data['message'] ?? '',
+                        'status' => $notification->data['status'] ?? null,
+                        'candidate_note' => $notification->data['candidate_note'] ?? null,
+                        'read_at' => $notification->read_at,
+                        'created_at' => $notification->created_at,
+                    ]),
+            ],
         ];
     }
 }

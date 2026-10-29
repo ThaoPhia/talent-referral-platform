@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Referral;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -20,7 +21,7 @@ class UpdateReferralRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::in(['pending', 'accepted', 'rejected'])],
+            'status' => ['required', Rule::in(Referral::STATUSES)],
         ];
     }
 }

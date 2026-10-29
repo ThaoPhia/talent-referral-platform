@@ -28,4 +28,14 @@ class Job extends Model
     {
         return $this->hasMany(Referral::class);
     }
+
+    /**
+     * Same rules as the public job list and new referrals: active, posted, and not past its close date.
+     */
+    public function isOpenForReferrals(): bool
+    {
+        return $this->status === 'active'
+            && $this->post_on->lte(now())
+            && $this->closed_on->toDateString() >= today(config('app.schedule_timezone'))->toDateString();
+    }
 }

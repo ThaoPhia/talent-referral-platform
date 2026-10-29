@@ -39,6 +39,10 @@ data_dir=$(get_env_value DOCKER_DATA_DIR '')
 app_env=$(get_env_value APP_ENV production)
 port=$(get_env_value APP_PORT 8000)
 proxy_network=$(get_env_value DOCKER_PROXY_NETWORK '')
+mail_host=$(get_env_value MAIL_HOST '')
+shared_mailpit=$(get_env_value DOCKER_SHARED_MAILPIT '')
+mailpit_port=$(get_env_value DOCKER_MAILPIT_PORT 8026)
+mailpit_image=$(get_env_value DOCKER_MAILPIT_IMAGE axllent/mailpit:latest)
 app_url=$(get_env_value APP_URL http://localhost)
 app_url=$(node --input-type=module -e '
     const url = new URL(process.argv[1])
@@ -98,6 +102,56 @@ else
     data_mount=$volume_name
 fi
 
+# When .env sends mail to "mailpit", use the shared Mailpit container named by
+# DOCKER_SHARED_MAILPIT (starting it if it's stopped), or run a Mailpit inbox
+# for this project on a private network that only the app joins.
+mailpit_container=
+mail_network=
+if [ "$mail_host" = "mailpit" ] && [ -n "$shared_mailpit" ]; then
+    if docker container inspect "$shared_mailpit" >/dev/null 2>&1; then
+        if [ "$(docker container inspect -f '{{.State.Running}}' "$shared_mailpit")" != "true" ]; then
+            printf 'Starting shared Mailpit %s...\n' "$shared_mailpit"
+            docker start "$shared_mailpit" >/dev/null
+        fi
+        mail_network=$(docker container inspect -f '{{range $name, $_ := .NetworkSettings.Networks}}{{println $name}}{{end}}' "$shared_mailpit" | grep -v -x -e bridge -e host -e none | head -n 1 || true)
+    fi
+
+    if [ -n "$mail_network" ]; then
+        printf 'Using shared Mailpit %s...\n' "$shared_mailpit"
+        # Address it by container name, so it doesn't need a "mailpit" alias.
+        set -- "$@" -e "MAIL_HOST=${shared_mailpit}"
+        if [ -n "$(docker ps -aq -f "name=^${container_name}-mailpit$")" ]; then
+            docker rm -f "${container_name}-mailpit" >/dev/null
+        fi
+    else
+        printf 'Shared Mailpit %s was not found on a Docker network; starting this project'"'"'s own Mailpit instead.\n' "$shared_mailpit" >&2
+    fi
+fi
+
+if [ "$mail_host" = "mailpit" ] && [ -z "$mail_network" ]; then
+    mailpit_container="${container_name}-mailpit"
+    mail_network="${container_name}-mail"
+
+    if ! docker network inspect "$mail_network" >/dev/null 2>&1; then
+        docker network create "$mail_network" >/dev/null
+    fi
+
+    if [ -n "$(docker ps -aq -f "name=^${mailpit_container}$")" ]; then
+        docker rm -f "$mailpit_container" >/dev/null
+    fi
+
+    printf 'Starting Mailpit inbox on http://127.0.0.1:%s...\n' "$mailpit_port"
+    docker volume create "$mailpit_container" >/dev/null
+    docker run -d --name "$mailpit_container" \
+        --restart unless-stopped \
+        --network "$mail_network" \
+        --network-alias mailpit \
+        -p "127.0.0.1:${mailpit_port}:8025" \
+        -e MP_DATABASE=/data/mailpit.db \
+        -v "${mailpit_container}:/data" \
+        "$mailpit_image" >/dev/null
+fi
+
 printf '%s\n' 'Starting container from new image...'
 # Match the container clock to this machine unless .env sets TZ itself.
 timezone=$(get_env_value TZ '')
@@ -116,4 +170,14 @@ docker run -d --name "$container_name" "$@" \
     -v "$(pwd)/public:/var/www/html/public" \
     "$image_name"
 
+if [ "$mail_host" = "mailpit" ]; then
+    docker network connect "$mail_network" "$container_name"
+fi
+
 printf 'Done. App is available at %s\n' "$app_url"
+if [ -n "$mailpit_container" ]; then
+    printf 'Mail inbox is available at http://127.0.0.1:%s\n' "$mailpit_port"
+elif [ "$mail_host" = "mailpit" ]; then
+    mailpit_url=$(docker port "$shared_mailpit" 8025/tcp 2>/dev/null | head -n 1 || true)
+    printf 'Mail is sent to the shared Mailpit %s%s\n' "$shared_mailpit" "${mailpit_url:+ (inbox: http://${mailpit_url})}"
+fi

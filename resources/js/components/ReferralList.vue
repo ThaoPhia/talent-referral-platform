@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import { Pencil } from '@lucide/vue'
+import { Download, ExternalLink, Pencil } from '@lucide/vue'
 import InputErrors from '@/components/InputErrors.vue'
 import { useToast } from 'primevue/usetoast'
 import { route } from '@/utils/route'
+import { formatDateTime, referralStatusLabel, referralStatusSeverity } from '@/utils'
 import type { Referral } from '@/types'
 
 const props = defineProps<{
@@ -13,6 +14,8 @@ const props = defineProps<{
 }>()
 
 const toast = useToast()
+const statusOptions = (['pending', 'accepted', 'rejected'] as const)
+    .map((value) => ({ value, label: referralStatusLabel(value) }))
 const editDialogOpen = ref(false)
 const selectedReferral = ref<Referral | null>(null)
 const editForm = useForm({
@@ -59,6 +62,9 @@ const updateReferral = () => {
         :value="props.referrals"
         stripedRows
     >
+        <template #empty>
+            No referrals yet.
+        </template>
         <Column header="Candidate">
             <template #body="{ data }">
                 <div class="flex flex-col">
@@ -79,10 +85,87 @@ const updateReferral = () => {
             field="job.title"
             header="Job"
         />
-        <Column
-            field="status"
-            header="Status"
-        />
+        <Column header="Resume">
+            <template #body="{ data }">
+                <a
+                    v-if="data.resume_link"
+                    :href="data.resume_link"
+                    class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                    :target="data.resume_type === 'link' ? '_blank' : undefined"
+                    :rel="data.resume_type === 'link' ? 'noopener noreferrer' : undefined"
+                >
+                    <ExternalLink
+                        v-if="data.resume_type === 'link'"
+                        class="size-4"
+                    />
+                    <Download
+                        v-else
+                        class="size-4"
+                    />
+                    {{ data.resume_type === 'link' ? 'Open link' : 'Download' }}
+                </a>
+                <span
+                    v-else
+                    class="text-sm text-muted-color"
+                >None</span>
+            </template>
+        </Column>
+        <Column header="Notes">
+            <template #body="{ data }">
+                <div
+                    v-if="data.referrer_note || data.candidate_note"
+                    class="flex max-w-xs flex-col gap-2 text-sm"
+                >
+                    <div v-if="data.referrer_note">
+                        <span class="text-xs font-medium text-muted-color">Referrer</span>
+                        <p class="m-0 line-clamp-3 whitespace-pre-line">
+                            {{ data.referrer_note }}
+                        </p>
+                    </div>
+                    <div v-if="data.candidate_note">
+                        <span class="text-xs font-medium text-muted-color">Candidate</span>
+                        <p class="m-0 line-clamp-3 whitespace-pre-line">
+                            {{ data.candidate_note }}
+                        </p>
+                    </div>
+                </div>
+                <span
+                    v-else
+                    class="text-sm text-muted-color"
+                >None</span>
+            </template>
+        </Column>
+        <Column header="Referred">
+            <template #body="{ data }">
+                <span class="text-sm">{{ formatDateTime(data.created_at) }}</span>
+            </template>
+        </Column>
+        <Column header="Viewed">
+            <template #body="{ data }">
+                <span
+                    v-if="data.viewed_at"
+                    class="text-sm"
+                >{{ formatDateTime(data.viewed_at) }}</span>
+                <span
+                    v-else
+                    class="text-sm text-muted-color"
+                >Not yet</span>
+            </template>
+        </Column>
+        <Column header="Status">
+            <template #body="{ data }">
+                <div class="flex flex-col items-start gap-1">
+                    <Tag
+                        :value="referralStatusLabel(data.status)"
+                        :severity="referralStatusSeverity(data.status)"
+                    />
+                    <span
+                        v-if="data.responded_at"
+                        class="text-xs text-muted-color"
+                    >{{ formatDateTime(data.responded_at) }}</span>
+                </div>
+            </template>
+        </Column>
         <Column
             v-if="props.canEdit"
             header="Actions"
@@ -117,7 +200,9 @@ const updateReferral = () => {
                 <label for="referral-status">Status</label>
                 <Select
                     v-model="editForm.status"
-                    :options="['pending', 'accepted', 'rejected']"
+                    :options="statusOptions"
+                    optionLabel="label"
+                    optionValue="value"
                     inputId="referral-status"
                     :invalid="Boolean(editForm.errors.status)"
                     fluid

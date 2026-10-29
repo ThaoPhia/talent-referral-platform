@@ -1,4 +1,5 @@
 import type { RequestPayload, VisitOptions } from '@inertiajs/core'
+import type { NotificationsProps } from './referral'
 
 export interface AuthProps {
     user: App.Data.UserData | null
@@ -11,6 +12,7 @@ export type SharedPageProps<T extends Record<string, unknown> = Record<string, u
     currentRouteName: string | null
     auth: AuthProps
     queryParams: Record<string, string | string[]>;
+    notifications: NotificationsProps | null
     [key: string]: unknown
 }
 

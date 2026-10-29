@@ -66,8 +66,7 @@ const referralForm = useForm({
     job_id: 0,
     candidate_name: '',
     candidate_email: '',
-    resume_url: '',
-    note: '',
+    referrer_note: '',
 })
 
 watch(
@@ -240,30 +239,18 @@ const closeReferralDialog = () => {
             </div>
 
             <div class="flex flex-col gap-2">
-                <label :for="`candidate-resume-${props.job.id}`">Resume URL</label>
-                <InputText
-                    :id="`candidate-resume-${props.job.id}`"
-                    v-model="referralForm.resume_url"
-                    :invalid="Boolean(referralForm.errors.resume_url)"
-                    type="text"
-                    required
-                    fluid
-                />
-                <InputErrors :errors="referralForm.errors.resume_url" />
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <label :for="`candidate-note-${props.job.id}`">Note</label>
+                <label :for="`referrer-note-${props.job.id}`">Note to candidate <span class="text-muted-color">(optional)</span></label>
                 <Textarea
-                    :id="`candidate-note-${props.job.id}`"
-                    v-model="referralForm.note"
-                    :invalid="Boolean(referralForm.errors.note)"
+                    :id="`referrer-note-${props.job.id}`"
+                    v-model="referralForm.referrer_note"
+                    :invalid="Boolean(referralForm.errors.referrer_note)"
                     rows="5"
+                    maxlength="5000"
                     autoResize
-                    required
                     fluid
                 />
-                <InputErrors :errors="referralForm.errors.note" />
+                <small class="text-muted-color">Included in the invitation email sent to the candidate.</small>
+                <InputErrors :errors="referralForm.errors.referrer_note" />
             </div>
 
             <div class="flex justify-end gap-3">

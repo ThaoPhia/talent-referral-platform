@@ -75,7 +75,19 @@ class LocalSampleDataSeeder extends Seeder
                     'candidate_id' => $candidates[$index % count($candidates)]->id,
                     'job_id' => $jobs[$index]->id,
                 ],
-                ['status' => $statuses[$index % count($statuses)]],
+                [
+                    'status' => $status = $statuses[$index % count($statuses)],
+                    'referrer_note' => 'Experienced candidate interested in collaborative teams.',
+                    'candidate_note' => match ($status) {
+                        'accepted' => 'Thanks for thinking of me. I would love to be considered.',
+                        'rejected' => 'Thank you, but I am not looking for a new role right now.',
+                        default => null,
+                    },
+                    'candidate_resume' => $status === 'accepted' ? "https://example.test/resumes/candidate-{$index}.pdf" : null,
+                    // Answered referrals were viewed first; every other pending one has been opened.
+                    'viewed_at' => $status !== 'pending' || $index % 2 === 0 ? now()->subDays(14 - $index)->setTime(10, 0) : null,
+                    'responded_at' => $status === 'pending' ? null : now()->subDays(14 - $index)->setTime(15, 0),
+                ],
             );
         }
     }
@@ -88,8 +100,6 @@ class LocalSampleDataSeeder extends Seeder
             'password' => 'password',
             'email_verified_at' => now(),
             'type' => $type,
-            'resume_url' => $type === 'candidate' ? "https://example.test/resumes/candidate-{$index}.pdf" : null,
-            'note' => $type === 'candidate' ? 'Experienced candidate interested in collaborative teams.' : null,
         ])->save();
 
         return $user;

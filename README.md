@@ -108,7 +108,7 @@ DOCKER_IMAGE_NAME=talent-referral-platform:latest
 DOCKER_VOLUME_NAME=talent-referral-platform-sqlite
 ```
 
-The SQLite database volume is preserved when the container is replaced. To keep the database in a folder on your computer instead (for example, to open it in DBeaver), set `DOCKER_DATA_DIR` to that folder's path in `.env`. The rebuild scripts create the folder if needed and mount it in place of the volume. The local `public/` directory is mounted into the container so Laravel can see Vite's live hot file and development fonts manifest.
+The SQLite database volume is preserved when the container is replaced. Candidate resume uploads are stored in a `resumes/` folder on the same volume (or `DOCKER_DATA_DIR` folder), so they survive rebuilds too. To keep the database in a folder on your computer instead (for example, to open it in DBeaver), set `DOCKER_DATA_DIR` to that folder's path in `.env`. The rebuild scripts create the folder if needed and mount it in place of the volume. The local `public/` directory is mounted into the container so Laravel can see Vite's live hot file and development fonts manifest.
 
 The container also runs Laravel's scheduler (`php artisan schedule:work`) next to Apache, so scheduled tasks such as the nightly `jobs:archive-expired` run automatically and appear in `docker logs`. The scheduler restarts itself if it stops. Set `RUN_SCHEDULER=false` in `.env` to turn it off.
 
@@ -132,6 +132,18 @@ docker exec talent-referral-platform php artisan db:seed
 Replace the container name if you customized `DOCKER_CONTAINER_NAME`. Run Artisan inside Docker when `DB_DATABASE` points to `/var/www/data/database.sqlite`; that path belongs to the container, not the host. For a host-based setup with its own database, use `php artisan db:seed` instead.
 
 The sample-data seeder runs only when `APP_ENV=local` and can be rerun safely. It creates 25 sample jobs, 25 sample users, 15 referrals, and a local admin account (`sample.admin@example.test`, password `password`). Sample user accounts also use the password `password`.
+
+### Viewing emails locally
+
+`docker:rebuild` can start a [Mailpit](https://mailpit.axllent.org) inbox that catches every email the app sends (referral invitations, referrer alerts, password resets) instead of delivering it. Point mail at it in `.env`:
+
+```dotenv
+MAIL_MAILER=smtp
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+```
+
+Then run `npm run docker:rebuild` and open http://127.0.0.1:8026. Set `DOCKER_MAILPIT_PORT` to use a different port. Mailpit runs as `<DOCKER_CONTAINER_NAME>-mailpit` on a private network shared only with the app, so it doesn't clash with other projects' Mailpit containers. Messages are kept in a Docker volume of the same name, so they survive rebuilds. To share one Mailpit (and inbox) with other projects instead, set `DOCKER_SHARED_MAILPIT` to that Mailpit's container name, for example `DOCKER_SHARED_MAILPIT=phia-property-rental-mailpit-1`. The rebuild starts that container if it's stopped, joins its Docker network, and sends mail to it instead of starting this project's own Mailpit. You don't need to start the other project. If the container doesn't exist (for example after `docker compose down` in the other project), the rebuild warns and falls back to this project's own Mailpit on port 8026. Messages from each app show their `MAIL_FROM_NAME` as the sender. Docker's `--env-file` doesn't expand variables, so set it to a literal name such as `MAIL_FROM_NAME="Talent Referral Platform"` rather than `"${APP_NAME}"`. Without `MAIL_HOST=mailpit`, no Mailpit container is started; `MAIL_MAILER=log` writes emails to `storage/logs/laravel.log` instead.
 
 ### Local HTTPS on macOS
 
@@ -166,9 +178,9 @@ If Vite is running, restart `npm run dev` after generating the certificates. Vit
 ## Project requirements
     Tables: 
         users(type: admin, referrer, candidate)
-            candidate (name, email, resume URL, note)
+            candidate (name, email)
         jobs(title, description, location, post, date, status(active, archived))
-        referrals (date, user_id, candidate_id, job_id, status(pending, accepted, rejected))
+        referrals (date, user_id, candidate_id, job_id, status(pending, accepted, rejected), referrer_note, candidate_note, candidate_resume (link or uploaded file), viewed_at, responded_at)
     Usages:
         Backend: Admin create/edit/view jobs; Admin view/edit referrals 
         Front-end: 
