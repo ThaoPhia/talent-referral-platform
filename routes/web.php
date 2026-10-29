@@ -10,9 +10,16 @@ use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\ReferralInvitationController;
 use App\Http\Controllers\ReferralResumeController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/', WelcomeController::class)->name('welcome');
+Route::get('/about', fn () => Inertia::render('About'))->name('about');
+Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('contact.store');
 
 // Fortify handled post requests for login, registration, password reset, etc.
 Route::get('/login', LoginController::class)->name('login');

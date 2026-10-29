@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Link as InertiaLink } from '@inertiajs/vue3'
+import { route } from '@/utils/route'
 import { useAppLayout } from '@/composables/useAppLayout'
 import Breadcrumb from '@/components/router-link-menus/Breadcrumb.vue'
 import ClientOnly from '@/components/ClientOnly.vue'
@@ -66,6 +68,23 @@ const {
 
             <footer class="border-t border-surface-200 py-6 text-sm text-muted-color dark:border-surface-800">
                 <Container>
+                    <nav
+                        aria-label="Footer"
+                        class="mb-3 flex justify-center gap-6"
+                    >
+                        <InertiaLink
+                            :href="route('about')"
+                            class="hover:underline"
+                        >
+                            About us
+                        </InertiaLink>
+                        <InertiaLink
+                            :href="route('contact')"
+                            class="hover:underline"
+                        >
+                            Contact us
+                        </InertiaLink>
+                    </nav>
                     <p class="m-0 text-center">
                         &copy; {{ copyrightYear }} Talent Referral Platform. All rights reserved.
                     </p>

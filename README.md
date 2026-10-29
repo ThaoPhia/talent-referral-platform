@@ -52,6 +52,17 @@ php artisan migrate
 
 ## Local Development
 
+### Public pages and contact form
+
+The public About Us (`/about`) and Contact Us (`/contact`) pages are linked in the shared footer.
+Contact messages are emailed to `MAIL_FROM_ADDRESS`, with the visitor's email as Reply-To.
+Configure your mail transport before deploying; local messages can be viewed in Mailpit.
+Submissions are limited to five per minute per IP address.
+
+Set `CONTACT_ADDRESS` in `.env` to change the displayed postal address. The default in
+`config/contact.php` is a placeholder, not a real office address; replace it before launch.
+After changing environment configuration, refresh the config cache (or rebuild the Docker container).
+
 Start the full development stack:
 
 ```bash

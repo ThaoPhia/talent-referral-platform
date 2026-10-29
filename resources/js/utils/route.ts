@@ -29,6 +29,8 @@ hash: string | number,
 'two-factor.recovery-codes': never,
 'two-factor.regenerate-recovery-codes': never,
 welcome: never,
+contact: never,
+'contact.store': never,
 dashboard: never,
 'admin.dashboard': never,
 'admin.jobs.index': never,
@@ -45,6 +47,9 @@ job: string | number,
 referral: string | number,
 },
 'referrals.store': never,
+'referrals.resume': {
+referral: string | number,
+},
 'notifications.read': never,
 'referrals.invitation.show': {
 token: string | number,
@@ -60,6 +65,7 @@ token: string | number,
 'two-factor.show': never,
 appearance: never,
 'boost.browser-logs': never,
+about: never,
 };
 export function route<T extends keyof RouteParameters>(name: T, parameters?: [RouteParameters[T]] extends [never] ? Record<string, never> : RouteParameters[T], absolute: boolean = false): string {
     let url: string = '/' + routes[name]
@@ -102,6 +108,8 @@ const routes = {
     "two-factor.recovery-codes": "user/two-factor-recovery-codes",
     "two-factor.regenerate-recovery-codes": "user/two-factor-recovery-codes",
     "welcome": "/",
+    "contact": "contact",
+    "contact.store": "contact",
     "dashboard": "dashboard",
     "admin.dashboard": "admin/dashboard",
     "admin.jobs.index": "admin/jobs",
@@ -112,6 +120,7 @@ const routes = {
     "admin.referrals.index": "admin/referrals",
     "admin.referrals.update": "admin/referrals/{referral}",
     "referrals.store": "referrals",
+    "referrals.resume": "referrals/{referral}/resume",
     "notifications.read": "notifications/read",
     "referrals.invitation.show": "referrals/invitation/{token}",
     "referrals.invitation.respond": "referrals/invitation/{token}",
@@ -122,5 +131,6 @@ const routes = {
     "user-password.update": "settings/password",
     "two-factor.show": "settings/two-factor",
     "appearance": "settings/appearance",
-    "boost.browser-logs": "_boost/browser-logs"
+    "boost.browser-logs": "_boost/browser-logs",
+    "about": "about"
 }
