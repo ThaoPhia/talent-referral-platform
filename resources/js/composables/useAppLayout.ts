@@ -17,13 +17,13 @@ export function useAppLayout() {
             route: '/',
             active: currentRoute.value == 'welcome',
         },
-        {
+        ...(page.props.auth.user ? [{
             key: 'dashboard',
             label: 'Dashboard',
             lucideIcon: LayoutGrid,
             route: route('dashboard'),
             active: currentRoute.value == 'dashboard',
-        },
+        }] : []),
         // {
         //     key: 'resources',
         //     label: 'Resources',

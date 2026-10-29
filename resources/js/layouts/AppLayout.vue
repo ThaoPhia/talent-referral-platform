@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppHead from '@/components/AppHead.vue'
-import AppLayout from '@/layouts/app/HeaderLayout.vue'
+import BodyLayout from '@/layouts/app/BodyLayout.vue'
 import { MenuItem } from '@/types'
 
 const props = withDefaults(defineProps<{
@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<{
         <slot name="head" />
     </AppHead>
 
-    <AppLayout :breadcrumbs="props.breadcrumbs">
+    <BodyLayout :breadcrumbs="props.breadcrumbs">
         <slot />
-    </AppLayout>
+    </BodyLayout>
 </template>
