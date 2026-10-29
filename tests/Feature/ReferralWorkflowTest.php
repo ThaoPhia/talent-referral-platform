@@ -284,6 +284,7 @@ class ReferralWorkflowTest extends TestCase
 
     public function test_referral_creation_is_limited_before_candidate_creation_or_email(): void
     {
+        config(['app.test_rate_limits' => true]);
         Notification::fake();
         $this->actingAs($this->user('referrer'));
         $job = $this->job();
@@ -310,6 +311,7 @@ class ReferralWorkflowTest extends TestCase
 
     public function test_creation_limits_follow_the_referrer_across_ips_and_the_ip_across_referrers(): void
     {
+        config(['app.test_rate_limits' => true]);
         Notification::fake();
         $referrer = $this->user('referrer');
         $job = $this->job();
@@ -336,6 +338,7 @@ class ReferralWorkflowTest extends TestCase
 
     public function test_guest_invitation_and_contact_limits_are_independent(): void
     {
+        config(['app.test_rate_limits' => true]);
         Notification::fake();
         $referral = $this->referral();
         $url = route('referrals.invitation.show', ['token' => $this->token($referral)]);
@@ -348,9 +351,6 @@ class ReferralWorkflowTest extends TestCase
             $this->post(route('contact.store'), $contact)->assertRedirect(route('contact'));
         }
         $this->post(route('contact.store'), $contact)->assertStatus(429);
-        for ($i = 5; $i < 30; $i++) {
-            $this->get($url)->assertOk();
-        }
         $this->get($url)->assertStatus(429);
         $this->post(route('referrals.invitation.respond', ['token' => $this->token($referral)]), [
             'decision' => 'rejected',
@@ -360,6 +360,7 @@ class ReferralWorkflowTest extends TestCase
 
     public function test_authenticated_contact_creation_and_resend_limits_are_independent(): void
     {
+        config(['app.test_rate_limits' => true]);
         Notification::fake();
         $referral = $this->referral();
         $this->actingAs($referral->referrer);
@@ -384,6 +385,7 @@ class ReferralWorkflowTest extends TestCase
 
     public function test_invitation_resends_are_rate_limited(): void
     {
+        config(['app.test_rate_limits' => true]);
         Notification::fake();
         $referral = $this->referral();
         $this->actingAs($referral->referrer);

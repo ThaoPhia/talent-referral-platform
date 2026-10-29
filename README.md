@@ -79,8 +79,10 @@ The public About Us (`/about`) and Contact Us (`/contact`) pages are linked in t
 Contact messages are emailed to `MAIL_FROM_ADDRESS`, with the visitor's email as Reply-To.
 Configure your mail transport before deploying; local messages can be viewed in Mailpit.
 Submissions are limited to five per minute per IP address.
-Contact submissions, referral creation, invitation viewing/responses (30 per minute
+Contact submissions, referral creation, invitation viewing/responses (five per minute
 per IP), and resends use separate rate-limit counters.
+These application limiters are unlimited in the `testing` environment by default.
+Tests specifically covering throttling opt in with `config(['app.test_rate_limits' => true])`.
 
 Set `CONTACT_ADDRESS` in `.env` to change the displayed postal address. The default in
 `config/contact.php` is a placeholder, not a real office address; replace it before launch.

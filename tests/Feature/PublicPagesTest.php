@@ -103,6 +103,7 @@ class PublicPagesTest extends TestCase
 
     public function test_contact_form_is_rate_limited(): void
     {
+        config(['app.test_rate_limits' => true]);
         Notification::fake();
 
         $data = ['name' => 'Alex', 'email' => 'alex@example.test', 'message' => 'Hello.'];
@@ -112,5 +113,18 @@ class PublicPagesTest extends TestCase
 
         $this->post(route('contact.store'), $data)->assertStatus(429);
         Notification::assertSentOnDemandTimes(ContactMessage::class, 5);
+    }
+
+    public function test_contact_submissions_are_not_rate_limited_by_default_when_testing(): void
+    {
+        Notification::fake();
+
+        for ($i = 0; $i < 6; $i++) {
+            $this->post(route('contact.store'), [
+                'name' => 'Alex', 'email' => 'alex@example.test', 'message' => 'Hello.',
+            ])->assertRedirect(route('contact'));
+        }
+
+        Notification::assertSentOnDemandTimes(ContactMessage::class, 6);
     }
 }

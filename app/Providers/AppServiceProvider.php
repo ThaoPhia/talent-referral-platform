@@ -27,31 +27,46 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
         $this->configureRateLimiters();
     }
 
-    /** 
+    /**
      * Configure rate limiters for the application.
      */
     protected function configureRateLimiters(): void
     {
         // Rate limiter for creating referrals. Limits to 5 per minute per user and per IP.
-        RateLimiter::for('referral-creation', fn (Request $request) => [
+        RateLimiter::for('referral-creation', fn (Request $request) => $this->rateLimitingEnabled() ? [
             Limit::perMinute(5)->by('user:'.$request->user()?->id),
             Limit::perMinute(5)->by('ip:'.$request->ip()),
-        ]);
+        ] : Limit::none());
 
         // Rate limiter for resending referrals. Limits to 5 per minute per user and per IP.
-        RateLimiter::for('referral-resend', fn (Request $request) => [
+        RateLimiter::for('referral-resend', fn (Request $request) => $this->rateLimitingEnabled() ? [
             Limit::perMinute(5)->by('user:'.$request->user()?->id),
             Limit::perMinute(5)->by('ip:'.$request->ip()),
-        ]);
+        ] : Limit::none());
 
-        // Rate limiter for contact form submissions. Limits to 2 per minute per IP.
-        RateLimiter::for('contact-submission', fn (Request $request) => Limit::perMinute(2)->by($request->ip()));
+        // Rate limiter for contact form submissions. Limits to 5 per minute per IP.
+        RateLimiter::for('contact-submission', fn (Request $request) => $this->rateLimitingEnabled()
+            ? Limit::perMinute(5)->by($request->ip())
+            : Limit::none());
 
         // Rate limiter for referral invitations. Limits to 5 per minute per IP.
-        RateLimiter::for('referral-invitation', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('referral-invitation', fn (Request $request) => $this->rateLimitingEnabled()
+            ? Limit::perMinute(5)->by($request->ip())
+            : Limit::none());
+    }
+
+    /**
+     * Determine if rate limiting is enabled for the application.
+     *
+     * @return bool
+     */
+    private function rateLimitingEnabled(): bool
+    {
+        return ! $this->app->environment('testing') || config('app.test_rate_limits', false) === true;
     }
 
     /**
