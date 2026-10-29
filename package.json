@@ -5,9 +5,16 @@
         "dev": "vite",
         "build": "vite build",
         "build:ssr": "vite build && vite build --ssr",
+        "docker:rebuild": "sh docker/rebuild.sh",
         "lint": "eslint . --fix",
         "typecheck": "vue-tsc --noEmit",
-        "docker:rebuild": "sh docker/rebuild.sh"
+        "test": "php artisan config:clear --ansi && php artisan test",
+        "check": "run-s check:*",
+        "check:pint": "vendor/bin/pint --test",
+        "check:phpstan": "vendor/bin/phpstan analyse --memory-limit=2G",
+        "check:test": "npm run test -- --compact",
+        "check:eslint": "eslint .",
+        "check:typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
         "@inertiajs/vue3": "^3.0.0",

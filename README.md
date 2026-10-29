@@ -74,14 +74,21 @@ npm run dev:kill
 
 ## Quality Checks
 
-Run the main checks before opening a pull request:
+Run the PHP tests:
 
 ```bash
-composer test
-composer analyse
-npm run lint
-npm run typecheck
+npm test
 ```
+
+Pass PHPUnit options after `--`, for example `npm test -- --filter=ReferralWorkflowTest` or `npm test -- tests/Feature/JobsAndReferralsTest.php`.
+
+Run every check that CI runs (Pint, PHPStan, tests, ESLint, and type checking) before opening a pull request:
+
+```bash
+npm run check
+```
+
+It stops at the first failing check. `npm run lint` and `vendor/bin/pint` fix issues automatically; `npm run check` only reports them.
 
 Build production assets:
 
