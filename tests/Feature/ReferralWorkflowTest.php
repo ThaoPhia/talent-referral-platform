@@ -8,12 +8,14 @@ use App\Models\User;
 use App\Notifications\ReferralInvitation;
 use App\Notifications\ReferralResponded;
 use App\Support\ReferralInvitationToken;
+use App\Http\Requests\StoreReferralRequest;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -166,6 +168,134 @@ class ReferralWorkflowTest extends TestCase
         Notification::assertSentTimes(ReferralInvitation::class, 2);
     }
 
+    public function test_duplicate_insert_race_returns_validation_error_and_preserves_existing_referral(): void
+    {
+        Notification::fake();
+        $referral = $this->referral();
+        $originalName = $referral->candidate->name;
+        // Simulate validation completing before another request created this referral.
+        $this->app->bind(StoreReferralRequest::class, fn () => new class () extends StoreReferralRequest {
+            public function after(): array
+            {
+                return [];
+            }
+        });
+
+        $this->actingAs($this->user('referrer'))
+            ->post(route('referrals.store'), $this->referralPayload($referral->job, [
+                'candidate_email' => $referral->candidate->email,
+            ]))
+            ->assertSessionHasErrors(['candidate_email' => 'This candidate has already been referred to this job.']);
+
+        $this->assertDatabaseCount('referrals', 1);
+        $this->assertSame($originalName, $referral->candidate->fresh()->name);
+        Notification::assertNothingSent();
+    }
+
+    public function test_losing_responses_do_not_overwrite_the_winner_or_notify_or_store_uploaded_files(): void
+    {
+        Notification::fake();
+        Storage::fake(Referral::RESUME_DISK);
+
+        foreach (['accepted', 'rejected'] as $decision) {
+            $referral = $this->referral();
+            $winner = $decision === 'accepted' ? 'rejected' : 'accepted';
+            $race = (object) ['interleaved' => false];
+            DB::connection()->beforeExecuting(function (string $query) use ($referral, $winner, $race): void {
+                if ($race->interleaved || ! str_starts_with($query, 'update "referrals"')) {
+                    return;
+                }
+
+                $race->interleaved = true;
+                $this->assertSame([], Storage::disk(Referral::RESUME_DISK)->allFiles());
+                $statement = DB::connection()->getPdo()->prepare(
+                    'UPDATE referrals SET status = ?, candidate_note = ?, candidate_resume = ?, responded_at = ?, viewed_at = ? WHERE id = ?',
+                );
+                $statement->execute([$winner, 'Winning note', 'https://example.com/winner.pdf', now(), now(), $referral->id]);
+            });
+
+            $this->post(route('referrals.invitation.respond', ['token' => $this->token($referral)]), [
+                'decision' => $decision,
+                'candidate_note' => 'Losing note',
+                ...($decision === 'accepted' ? [
+                    'resume_file' => UploadedFile::fake()->create('resume.pdf', 100, 'application/pdf'),
+                ] : []),
+            ])->assertRedirect()->assertSessionHasNoErrors();
+
+            $this->assertTrue($race->interleaved);
+            $this->assertSame($winner, $referral->fresh()->status);
+            $this->assertSame('Winning note', $referral->fresh()->candidate_note);
+            $this->assertSame('https://example.com/winner.pdf', $referral->fresh()->candidate_resume);
+            $this->assertSame([], Storage::disk(Referral::RESUME_DISK)->allFiles());
+        }
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_admin_and_owning_referrer_can_resend_an_invitation(): void
+    {
+        Notification::fake();
+        $referral = $this->referral();
+
+        foreach ([$referral->referrer, $this->user('admin')] as $user) {
+            $this->actingAs($user)->post(route('referrals.resend', $referral))->assertRedirect();
+        }
+
+        Notification::assertSentToTimes($referral->candidate, ReferralInvitation::class, 2);
+        $this->assertSame('pending', $referral->fresh()->status);
+    }
+
+    public function test_unrelated_users_cannot_resend_and_closed_or_answered_referrals_are_not_sent(): void
+    {
+        Notification::fake();
+        $referral = $this->referral();
+        $url = route('referrals.resend', $referral);
+        $this->post($url)->assertRedirect(route('login'));
+        $this->actingAs($this->user('referrer'))->post($url)->assertForbidden();
+        $this->actingAs($referral->candidate)->post($url)->assertForbidden();
+
+        $referral->update(['status' => 'accepted']);
+        $this->actingAs($referral->referrer)->post($url)->assertRedirect();
+        $referral->update(['status' => 'pending']);
+        $referral->job->update(['status' => 'archived']);
+        $this->post($url)->assertRedirect();
+        Notification::assertNothingSent();
+    }
+
+    public function test_failed_invitation_can_be_resent_after_mail_recovers(): void
+    {
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => '127.0.0.1',
+            'mail.mailers.smtp.port' => 1,
+            'mail.mailers.smtp.timeout' => 1,
+        ]);
+        $referrer = $this->user('referrer');
+        $this->actingAs($referrer)
+            ->post(route('referrals.store'), $this->referralPayload($this->job()))->assertRedirect();
+        $referral = Referral::query()->sole();
+        $this->post(route('referrals.resend', $referral))->assertRedirect();
+        $this->assertDatabaseCount('referrals', 1);
+
+        Notification::fake();
+        $this->post(route('referrals.resend', $referral))->assertRedirect();
+        Notification::assertSentTo($referral->candidate, ReferralInvitation::class);
+    }
+
+    public function test_invitation_resends_are_rate_limited(): void
+    {
+        Notification::fake();
+        $referral = $this->referral();
+        $this->actingAs($referral->referrer);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post(route('referrals.resend', $referral))->assertRedirect();
+        }
+
+        $this->post(route('referrals.resend', $referral))->assertStatus(429);
+        Notification::assertSentToTimes($referral->candidate, ReferralInvitation::class, 5);
+    }
+
     public function test_invalid_or_tampered_tokens_are_not_found(): void
     {
         $referral = $this->referral();
@@ -295,6 +425,20 @@ class ReferralWorkflowTest extends TestCase
         Notification::fake();
         Storage::fake(Referral::RESUME_DISK);
         $referral = $this->referral();
+        $updates = 0;
+        DB::connection()->beforeExecuting(function (string $query) use ($referral, &$updates): void {
+            if (! str_starts_with($query, 'update "referrals"')) {
+                return;
+            }
+
+            $updates++;
+            if ($updates === 1) {
+                $this->assertSame([], Storage::disk(Referral::RESUME_DISK)->allFiles());
+            } else {
+                $this->assertSame('accepted', $referral->fresh()->status);
+                $this->assertCount(1, Storage::disk(Referral::RESUME_DISK)->allFiles());
+            }
+        });
 
         $this->post(route('referrals.invitation.respond', ['token' => $this->token($referral)]), [
             'decision' => 'accepted',
@@ -306,6 +450,39 @@ class ReferralWorkflowTest extends TestCase
         $this->assertSame('file', $referral->resume_type);
         $this->assertStringStartsWith("{$referral->id}/", (string) $referral->candidate_resume);
         Storage::disk(Referral::RESUME_DISK)->assertExists((string) $referral->candidate_resume);
+        $this->assertSame(2, $updates);
+    }
+
+    public function test_resume_storage_failure_rolls_back_the_candidate_response(): void
+    {
+        Notification::fake();
+        $referral = $this->referral();
+        $disk = \Mockery::mock(\Illuminate\Filesystem\FilesystemAdapter::class);
+        $disk->shouldReceive('putFileAs')->once()->andReturnUsing(function () use ($referral): never {
+            $this->assertSame('accepted', $referral->fresh()->status);
+
+            throw new \RuntimeException('Resume storage unavailable');
+        });
+        Storage::shouldReceive('disk')->with(Referral::RESUME_DISK)->once()->andReturn($disk);
+        $this->withoutExceptionHandling();
+
+        try {
+            $this->post(route('referrals.invitation.respond', ['token' => $this->token($referral)]), [
+                'decision' => 'accepted',
+                'candidate_note' => 'Candidate note',
+                'resume_file' => UploadedFile::fake()->create('resume.pdf', 100, 'application/pdf'),
+            ]);
+            $this->fail('Expected the storage failure to be surfaced.');
+        } catch (\RuntimeException $exception) {
+            $this->assertSame('Resume storage unavailable', $exception->getMessage());
+        }
+
+        $referral->refresh();
+        $this->assertSame('pending', $referral->status);
+        $this->assertNull($referral->responded_at);
+        $this->assertNull($referral->candidate_resume);
+        $this->assertNull($referral->candidate_note);
+        Notification::assertNothingSent();
     }
 
     public function test_resume_file_type_and_size_are_validated(): void

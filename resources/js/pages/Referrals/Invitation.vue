@@ -194,7 +194,7 @@ const closedMessage = computed(() => props.referral.status === 'pending'
                                         :auto="false"
                                         :invalid="Boolean(form.errors.resume_file || form.errors.resume_url)"
                                         @select="onResumeSelect"
-                                        @clear="clearResumeFile"
+                                        @clear="form.resume_file = null"
                                     />
                                     <Button
                                         v-if="form.resume_file"

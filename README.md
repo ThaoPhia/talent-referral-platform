@@ -52,6 +52,25 @@ php artisan migrate
 
 ## Local Development
 
+### Referral invitations
+
+Admins and the owning referrer can use **Resend invitation** in their referral list
+to retry an invitation after a mail outage. Only pending referrals for open jobs can
+be resent; requests are limited to five per minute per IP. A failed send keeps the
+referral and shows a warning so it can be retried later.
+
+Candidate responses use an atomic pending-to-decided update. Only the winning
+request stores an uploaded resume and sends a response notification. File storage
+happens after the status update inside the same database transaction; a storage
+failure rolls back the response so the candidate can retry.
+
+When upgrading an older database, the invitation-tracking migration keeps the newest
+referral (highest ID) for each job/candidate pair before adding the unique index.
+Older duplicates are preserved in `referral_duplicate_archive`, including their
+original IDs, complete original row data, and the retained referral ID. They are
+excluded from active referral lists and statistics. Rolling back that migration
+restores the archived rows. Already-migrated databases do not rerun this migration.
+
 ### Public pages and contact form
 
 The public About Us (`/about`) and Contact Us (`/contact`) pages are linked in the shared footer.

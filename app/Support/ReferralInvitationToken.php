@@ -11,6 +11,19 @@ use Illuminate\Support\Facades\Crypt;
  */
 class ReferralInvitationToken
 {
+    public static function findReferral(string $token): Referral
+    {
+        $pair = self::decode($token);
+
+        abort_if($pair === null, 404);
+
+        return Referral::query()
+            ->with(['job', 'referrer', 'candidate'])
+            ->where('job_id', $pair['job_id'])
+            ->where('candidate_id', $pair['candidate_id'])
+            ->firstOrFail();
+    }
+
     public static function encode(Referral $referral): string
     {
         $payload = json_encode([

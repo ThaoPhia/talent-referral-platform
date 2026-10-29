@@ -21,6 +21,13 @@ const selectedReferral = ref<Referral | null>(null)
 const editForm = useForm({
     status: 'pending' as Referral['status'],
 })
+const resendForm = useForm({})
+
+const resendInvitation = (referral: Referral) => {
+    resendForm.post(route('referrals.resend', { referral: referral.id }), {
+        preserveScroll: true,
+    })
+}
 
 const editReferral = (referral: Referral) => {
     selectedReferral.value = referral
@@ -184,11 +191,19 @@ const updateReferral = () => {
             </template>
         </Column>
         <Column
-            v-if="props.canEdit"
             header="Actions"
         >
             <template #body="{ data }">
                 <Button
+                    v-if="data.status === 'pending' && data.candidate && data.job"
+                    label="Resend invitation"
+                    severity="secondary"
+                    text
+                    :disabled="resendForm.processing"
+                    @click="resendInvitation(data)"
+                />
+                <Button
+                    v-if="props.canEdit"
                     v-tooltip.top="'Edit referral'"
                     aria-label="Edit referral"
                     severity="secondary"

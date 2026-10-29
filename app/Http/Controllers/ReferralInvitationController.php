@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RespondToReferralRequest;
 use App\Models\Referral;
 use App\Notifications\ReferralResponded;
 use App\Support\ReferralInvitationToken;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -20,7 +21,8 @@ class ReferralInvitationController extends Controller
 {
     public function show(string $token): Response
     {
-        $referral = $this->findReferral($token);
+        // Find the referral associated with the given token. If not found, an exception will be thrown.
+        $referral = ReferralInvitationToken::findReferral($token);
 
         if ($referral->viewed_at === null) {
             $referral->forceFill(['viewed_at' => now()])->save();
@@ -51,54 +53,50 @@ class ReferralInvitationController extends Controller
         ]);
     }
 
-    public function respond(Request $request, string $token): RedirectResponse
+    public function respond(RespondToReferralRequest $request, string $token): RedirectResponse
     {
-        $referral = $this->findReferral($token);
+        // Find the referral associated with the given token. If not found, an exception will be thrown.
+        $referral = $request->referral();
+        $accepting = $request->accepting();
+        $validated = $request->validated();
 
-        if (! $referral->canBeRespondedTo()) {
-            Inertia::flash('warn_toast', $referral->status === 'pending'
-                ? 'This job is no longer accepting responses.'
-                : 'You have already responded to this referral.');
+        $resume = null;
+
+        $file = $accepting ? $request->file('resume_file') : null;
+
+        try {
+            $updated = DB::transaction(function () use ($referral, $validated, $accepting, $file, &$resume): int {
+                $updated = Referral::query()->whereKey($referral->id)->where('status', 'pending')->update([
+                    'status' => $validated['decision'],
+                    'candidate_note' => $validated['candidate_note'] ?? null,
+                    'candidate_resume' => $accepting && ! $file instanceof UploadedFile ? $validated['resume_url'] : null,
+                    'responded_at' => now(),
+                    'viewed_at' => DB::raw('COALESCE(viewed_at, CURRENT_TIMESTAMP)'),
+                ]);
+
+                // If the referral was successfully updated and a resume file was uploaded, store the file and update the referral with its path.
+                if ($updated > 0 && $file instanceof UploadedFile) {
+                    $resume = $file->store((string) $referral->id, Referral::RESUME_DISK);
+                    Referral::query()->whereKey($referral->id)->update(['candidate_resume' => $resume]);
+                }
+
+                return $updated;
+            });
+        } catch (Throwable $exception) {
+            if (is_string($resume)) {
+                Storage::disk(Referral::RESUME_DISK)->delete($resume);
+            }
+
+            throw $exception;
+        }
+
+        if ($updated === 0) {
+            Inertia::flash('warn_toast', 'You have already responded to this referral.');
 
             return to_route('referrals.invitation.show', ['token' => $token]);
         }
 
-        $accepting = $request->input('decision') === 'accepted';
-
-        $validated = $request->validate([
-            'decision' => ['required', Rule::in(['accepted', 'rejected'])],
-            'candidate_note' => ['nullable', 'string', 'max:5000'],
-            // Either a resume URL or a file must be provided if accepting the referral.
-            'resume_url' => [
-                Rule::requiredIf($accepting && ! $request->hasFile('resume_file')),
-                'nullable',
-                'url:http,https',
-                'max:2048',
-                'prohibits:resume_file',
-            ],
-            'resume_file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'extensions:pdf,doc,docx', 'max:2048'],
-        ], [
-            'resume_url.required' => 'Add a link to your resume or upload a file to accept this referral.',
-            'resume_url.prohibits' => 'Provide either a resume link or a file, not both.',
-            'resume_file.max' => 'The resume file may not be larger than 2 MB.',
-        ]);
-
-        $resume = null;
-
-        if ($accepting) {
-            $file = $request->file('resume_file');
-            $resume = $file instanceof UploadedFile
-                ? $file->store((string) $referral->id, Referral::RESUME_DISK)
-                : $validated['resume_url'];
-        }
-
-        $referral->forceFill([
-            'status' => $validated['decision'],
-            'candidate_note' => $validated['candidate_note'] ?? null,
-            'candidate_resume' => $resume,
-            'responded_at' => now(),
-            'viewed_at' => $referral->viewed_at ?? now(),
-        ])->save();
+        $referral->refresh();
 
         try {
             $referral->referrer->notify(new ReferralResponded($referral));
@@ -114,16 +112,4 @@ class ReferralInvitationController extends Controller
         return to_route('referrals.invitation.show', ['token' => $token]);
     }
 
-    private function findReferral(string $token): Referral
-    {
-        $pair = ReferralInvitationToken::decode($token);
-
-        abort_if($pair === null, 404);
-
-        return Referral::query()
-            ->with(['job', 'referrer', 'candidate'])
-            ->where('job_id', $pair['job_id'])
-            ->where('candidate_id', $pair['candidate_id'])
-            ->firstOrFail();
-    }
 }

@@ -45,6 +45,9 @@ Route::middleware(['auth', 'verified'])
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/referrals', [ReferralController::class, 'store'])->name('referrals.store');
+    Route::post('/referrals/{referral}/resend', [ReferralController::class, 'resend'])
+        ->middleware('throttle:5,1')
+        ->name('referrals.resend');
     Route::get('/referrals/{referral}/resume', ReferralResumeController::class)->name('referrals.resume');
     Route::post('/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');
 });

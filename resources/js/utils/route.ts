@@ -47,6 +47,9 @@ job: string | number,
 referral: string | number,
 },
 'referrals.store': never,
+'referrals.resend': {
+referral: string | number,
+},
 'referrals.resume': {
 referral: string | number,
 },
@@ -120,6 +123,7 @@ const routes = {
     "admin.referrals.index": "admin/referrals",
     "admin.referrals.update": "admin/referrals/{referral}",
     "referrals.store": "referrals",
+    "referrals.resend": "referrals/{referral}/resend",
     "referrals.resume": "referrals/{referral}/resume",
     "notifications.read": "notifications/read",
     "referrals.invitation.show": "referrals/invitation/{token}",
